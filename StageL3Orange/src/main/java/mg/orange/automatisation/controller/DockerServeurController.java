@@ -12,7 +12,6 @@ import mg.orange.automatisation.dao.BdServeurDAO;
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.SshConfig;
 import mg.orange.automatisation.metier.Configurateur;
-import mg.orange.automatisation.metier.Fichier;
 import mg.orange.automatisation.metier.SshConnection;
 
 @Controller
