@@ -1,0 +1,59 @@
+/* 
+    Created on : 12 sept. 2018, 21:24:54
+    Author     : Team : kifra - Mbossy - castiel
+*/
+
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    /*max-width: 280px;*/
+}
+
+.masthead
+{
+    position: fi;
+    width: 100%;
+    height: auto;
+    min-height: 35rem;
+    padding: 15rem 0;
+    background: linear-gradient(to bottom,rgba(22,22,22,.1) 0,rgba(22,22,22,.5) 75%,#161616 100%),url(../img/bg-masthead.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-size: 100%,100%;
+}
+
+    .masthead h1 {
+        font-family: 'Varela Round';
+        font-size: 2.5rem;
+        line-height: 2.5rem;
+        letter-spacing: .8rem;
+        -webkit-text-fill-color: white;
+    }
+@media (min-width: 992px) .masthead h1 
+{
+    font-size: 6.5rem; line-height: 6.5rem; letter-spacing: .8rem;
+}
+body {
+    font-family: Nunito;
+    letter-spacing: .0625em;
+}

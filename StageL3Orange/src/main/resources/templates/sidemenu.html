@@ -1,0 +1,56 @@
+    <!-- **********************************************************************************************************************************************************
+        MAIN SIDEBAR MENU
+        *********************************************************************************************************************************************************** -->
+    <!--sidebar start-->
+    <aside>
+      <div id="sidebar" class="nav-collapse " tabindex="5000" style="overflow: hidden; outline: none; margin-left: 0px;">
+      
+      
+        <!-- sidebar menu start-->
+        <ul class="sidebar-menu" id="nav-accordion" style="display: none;">
+          <p class="centered"><a href="profile.html"><img src="img/ui-sam.jpg" class="img-circle" width="80"></a></p>
+          <h5 class="centered"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:if="${session.user}" th:utext="${session.user.user + '@' + session.user.adresse}"></span></font></font></h5>
+          
+         
+          <!-- serveur -->
+          <li class="sub-menu dcjq-parent-li">
+            <a href="javascript:;" class="dcjq-parent active">
+              <i class="fa fa-desktop"></i>
+              <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Serveur </font></font></span>
+              <span class="dcjq-icon"></span>
+             </a>
+             
+            <ul class="sub" style="display: none;">              
+              <li><a href="/serveurList"> Listes </a></li>
+              <li class="active"><a href="/serveurAjout"> Ajouter </a></li>
+              <li><a href="/serveurDeployer"> Deployer </a></li>
+              <li><a href="/serveurEncours"> Travailler </a></li>
+            </ul>
+            
+          </li>
+          
+          
+          <!-- BD serveur -->
+          <li class="sub-menu dcjq-parent-li">
+            <a href="javascript:;" class="dcjq-parent">
+              <i class="fa fa-desktop"></i>
+              <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Serveur de Base de donnee</font></font></span>
+              <span class="dcjq-icon"></span>
+             </a>
+             
+            <ul class="sub" style="display: none;">
+            	<li><a href="/bdServeurList"> Liste </a></li>
+              <li><a href="/bdServeurAjout"> Ajouter </a></li>
+              <li><a href="/bdServeurDeployer"> Deployer </a></li>
+              <li><a href="/bdServeurEncours"> Travailler </a></li>
+            </ul>            
+          </li>
+          
+          
+                
+        
+        </ul>
+        <!-- sidebar menu end-->
+      </div>
+    </aside>
+    <!--sidebar end-->

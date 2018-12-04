@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<!-- Favicons -->
+	<link href="img/favicon.png" rel="icon">
+	<link href="img/apple-touch-icon.png" rel="apple-touch-icon">
+	
+	<!-- prerequis -->
+	<meta th:insert="prerequis">
+	<meta th:fragment="prerequis">
+	
+	<!--external css-->
+  	<link href="style/font-awesome/css/font-awesome.css" rel="stylesheet" />
+  	
+	<title> Orange Madagascar </title>
+</head>
+<body>
+	<div id="login-page">
+    <div class="container">
+      <form class="form-login" action="connexion" method="post">
+        <h2 class="form-login-heading"> Connexion </h2>
+        
+        <!--  Erreur -->	
+		<div th:if="${Erreur}" class="alert alert-danger fade in" role="alert">
+			      <button type="button" class="close" data-dismiss="alert">
+				      <span aria-hidden="true">
+					      <font style="vertical-align: inherit;">
+					      <font style="vertical-align: inherit;"> X </font>
+					      </font>
+				      </span>
+			      </button>
+			      
+				      <strong>
+				      	<font style="vertical-align: inherit;">
+				      	<font style="vertical-align: inherit;"> Erreur: </font>
+				      	</font>
+				      </strong>
+				      
+			      <font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+			      <span th:utext="${Erreur}"></span>
+				</font>
+				</font>
+			</div>
+		
+        <div class="login-wrap">
+        	<input name="serv_adr" type="text" class="form-control" placeholder="Adresse du serveur" autofocus required>
+          	<br>
+          <input name="serv_user" type="text" class="form-control" placeholder="Nom d'utilisateur" required>
+          <br>
+          <input name="serv_pass" type="password" class="form-control" placeholder="Mot de passe" required>
+			<br>
+			<input name="serv_port" type="number" class="form-control" placeholder="port" required>
+			<br>
+          <button class="btn btn-warning btn-block" href="index.html" type="submit"><i class="fa fa-lock"></i> Connexion </button>
+          <hr>
+          
+          <div class="login-social-link centered">
+            <p>
+            	Mettre ici les informations du serveurs sur lequel travailler
+            </p>
+          </div>
+        </div>
+        <!-- Modal -->
+      </form>
+    </div>
+  </div>
+    <!-- js placed at the end of the document so the pages load faster -->	  
+	  <script src="script/jquery-1.10.2.js"></script>
+	  <script src="script/bootstrap.js"></script>
+  
+  <!-- You can use an image of whatever size. This script will stretch to fit in any screen size.-->
+  <script type="text/javascript" src="script/jquery.backstretch.min.js"></script>  
+  <script>
+    $.backstretch("img/bg.jpg", {
+      speed: 500
+    });
+  </script>
+
+</body>
+</html>

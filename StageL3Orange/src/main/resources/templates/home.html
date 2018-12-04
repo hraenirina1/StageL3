@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta th:insert="prerequis">
+	<meta th:fragment="prerequis">
+	<meta charset="UTF-8">
+	<title> Orange Madagascar </title>
+</head>
+<body>
+	<!-- body-->
+    <section id="container" class="sidebar-close">
+    
+    <div th:insert="entete"></div>
+	<div th:fragment="entete"></div>
+	
+	<div th:insert="sidemenu"></div>
+	<div th:fragment="sidemenu"></div>
+	
+	
+    <!-- **********************************************************************************************************************************************************
+        MAIN CONTENT
+        *********************************************************************************************************************************************************** -->
+    <!--main content start-->
+    <section id="main-content" style="margin-left: 210px;">
+      <section class="wrapper site-min-height">
+        <h3><i class="fa fa-angle-right"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Principale </font></font></h3>
+        <div class="row mt">
+          <div class="col-lg-12">
+          <!-- **********************************************************************************************************************************************************
+                *********************************************************************************************************************************************************** -->
+          
+            <p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Bienvenu </font></font></p>
+            
+            
+           <!-- **********************************************************************************************************************************************************
+           *********************************************************************************************************************************************************** -->
+          </div>
+        </div>
+      </section>
+      <!-- /wrapper -->
+    </section>
+    <!-- /MAIN CONTENT -->
+    <!--main content end-->
+  	
+  	<div th:insert="pied"></div>
+	<div th:fragment="pied"></div>  
+  </section>
+    
+	<p th:insert="script"></p>
+	<p th:fragment="script"></p>
+</body>
+</html>
