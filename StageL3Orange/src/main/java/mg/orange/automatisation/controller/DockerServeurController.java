@@ -12,6 +12,7 @@ import mg.orange.automatisation.dao.BdServeurDAO;
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.SshConfig;
 import mg.orange.automatisation.metier.Configurateur;
+import mg.orange.automatisation.metier.Fichier;
 import mg.orange.automatisation.metier.SshConnection;
 
 @Controller
@@ -31,15 +32,8 @@ public class DockerServeurController {
 		SshConnection sshCon = SshConnection.CreerConnection(new SshConfig("127.0.0.1", "root", "123456",2022));
 		
 		Configurateur conf = new Configurateur(sshCon);
+		conf.configurer(Integer.parseInt(nb_DockerServeur));		
 		
-		conf.creerDossier("MariaConf");
-		conf.creerDossier("MariaConf/env");
-		conf.creerDossier("MariaConf/init");
-		conf.creerDossier("mkdir MariaConf/10.2");
-		
-		conf.creerFicher("MariaConf/env/Dockerfile", "hahaha");
-		
-	
 		return "dockerList";
 	}
 
