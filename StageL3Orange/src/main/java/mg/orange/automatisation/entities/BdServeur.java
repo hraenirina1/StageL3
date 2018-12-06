@@ -13,14 +13,35 @@ public class BdServeur {
 	@GeneratedValue
 	private Long id_bdServeur;
 	private String nomBdServeur;
+	private int masque;
 	
 	@OneToOne
-	@JoinColumn(name="id_ip")
+	@JoinColumn(name="id_ip_externe")
 	private IP ip_externe;
+	
+	@OneToOne
+	@JoinColumn(name="id_ip_adresse_reseau")
+	private IP adresseReseau;
 	
 	@ManyToOne
 	@JoinColumn(name="id_serveur")
 	private Serveur serveur;
+	
+	
+	
+	public IP getAdresseReseau() {
+		return adresseReseau;
+	}
+	public void setAdresseReseau(IP adresseReseau) {
+		this.adresseReseau = adresseReseau;
+	}
+	public int getMasque() {
+		return masque;
+	}
+	public void setMasque(int masque) {
+		this.masque = masque;
+	}
+	
 	
 	
 	public BdServeur() {
@@ -36,6 +57,15 @@ public class BdServeur {
 		super();
 		this.nomBdServeur = nomBdServeur;
 		this.ip_externe = ip_externe;
+		this.serveur = serveur;
+	}
+	
+	public BdServeur(String nomBdServeur, int masque, IP ip_externe, IP adresseReseau, Serveur serveur) {
+		super();
+		this.nomBdServeur = nomBdServeur;
+		this.masque = masque;
+		this.ip_externe = ip_externe;
+		this.adresseReseau = adresseReseau;
 		this.serveur = serveur;
 	}
 	public Long getId_bdServeur() {

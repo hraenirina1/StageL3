@@ -68,16 +68,23 @@ public class BdServeurController {
 			@RequestParam("ipbdserveur2")String ip2,
 			@RequestParam("ipbdserveur3")String ip3,
 			@RequestParam("ipbdserveur4")String ip4,
+			@RequestParam("adServ1")String ad1,
+			@RequestParam("adServ2")String ad2,
+			@RequestParam("adServ3")String ad3,
+			@RequestParam("adServ4")String ad4,
+			@RequestParam("masque")String masque,
 			@RequestParam("idserveur")String serveur,
 			Model model)
 	{
 		//if(session.getAttribute("user")==null) return "redirect:/";
 		
 		IP ipdbserv = new IP(Integer.parseInt(ip1),Integer.parseInt(ip2),Integer.parseInt(ip3),Integer.parseInt(ip4));
+		IP addbserv = new IP(Integer.parseInt(ad1),Integer.parseInt(ad2),Integer.parseInt(ad3),Integer.parseInt(ad4));
 		ip.save(ipdbserv);
+		ip.save(addbserv);
 		
 		Serveur pserveur = serv.findById(Long.valueOf(serveur)).get();
-		bdserv.save(new BdServeur(nom,ipdbserv,pserveur));	
+		bdserv.save(new BdServeur(nom,Integer.parseInt(masque),ipdbserv,addbserv,pserveur));	
 		
 		return "bdserveurlist";
 	}

@@ -384,7 +384,7 @@ public class Configurateur {
 		
 		CreerDeployer("MariaConf/deploy.sh",nombre,"net","192.168.30.");
 		commandes.add("cd MariaConf && bash deploy.sh");
-		//commandes.add("rm -Rvf MariaConf");
+		commandes.add("rm -Rvf MariaConf");
 		sshConnex.ExecuterCommande(commandes);
 		commandes.clear();
 		

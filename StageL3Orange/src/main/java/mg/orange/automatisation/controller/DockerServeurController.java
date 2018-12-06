@@ -31,8 +31,8 @@ public class DockerServeurController {
 		BdServeur bd = bdserv.findById(Long.valueOf(id_bdserveur)).get();		
 		SshConnection sshCon = SshConnection.CreerConnection(new SshConfig("127.0.0.1", "root", "123456",2022));
 		
-		Configurateur conf = new Configurateur(sshCon);
-		conf.configurer(Integer.parseInt(nb_DockerServeur));		
+		//Configurateur conf = new Configurateur(sshCon);
+		//conf.configurer(Integer.parseInt(nb_DockerServeur));		
 		
 		return "dockerList";
 	}

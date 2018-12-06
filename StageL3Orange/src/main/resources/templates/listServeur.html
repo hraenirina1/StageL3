@@ -49,11 +49,6 @@
                       <a href="/bdServeurList" th:href="@{'/bdServeurList?serv=' + ${serveur.id_serveur}}"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serveur.nom}"></span></font></font></a>
                     </td>
                     <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serveur.ip.part1 + '.' + serveur.ip.part2 + '.' +serveur.ip.part3 + '.' + serveur.ip.part4 }"></span></font></font></td>
-                    <td>
-                      <button class="btn btn-success btn-xs"><i class="fa fa-check"></i></button>
-                      <button class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></button>
-                      <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i></button>
-                    </td>
                   </tr>                  
                 </tbody>
               </table>
