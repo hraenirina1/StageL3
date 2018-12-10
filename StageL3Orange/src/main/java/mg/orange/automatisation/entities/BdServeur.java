@@ -1,5 +1,6 @@
 package mg.orange.automatisation.entities;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -12,6 +13,7 @@ public class BdServeur {
 	@Id
 	@GeneratedValue
 	private Long id_bdServeur;
+	@Column(unique=true)
 	private String nomBdServeur;
 	private int masque;
 	
@@ -26,7 +28,6 @@ public class BdServeur {
 	@ManyToOne
 	@JoinColumn(name="id_serveur")
 	private Serveur serveur;
-	
 	
 	
 	public IP getAdresseReseau() {
@@ -88,9 +89,6 @@ public class BdServeur {
 		return ip_externe;
 	}
 	
-	
-
-
 	public Serveur getServeur() {
 		return serveur;
 	}

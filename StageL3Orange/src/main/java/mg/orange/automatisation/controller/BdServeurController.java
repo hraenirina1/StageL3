@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import mg.orange.automatisation.dao.BdServeurDAO;
+import mg.orange.automatisation.dao.DockerServeurDAO;
 import mg.orange.automatisation.dao.IPDAO;
 import mg.orange.automatisation.dao.ServeurDAO;
 import mg.orange.automatisation.entities.BdServeur;
@@ -29,7 +30,8 @@ public class BdServeurController {
 	private ServeurDAO serv;
 	@Autowired
 	private IPDAO ip;
-	
+	@Autowired 
+	private DockerServeurDAO dockerserv;
 	
 	@GetMapping("/bdServeurList")
 	public String bdserveurList(HttpSession session,
@@ -84,9 +86,16 @@ public class BdServeurController {
 		ip.save(addbserv);
 		
 		Serveur pserveur = serv.findById(Long.valueOf(serveur)).get();
-		bdserv.save(new BdServeur(nom,Integer.parseInt(masque),ipdbserv,addbserv,pserveur));	
+		try {
+			bdserv.save(new BdServeur(nom,Integer.parseInt(masque),ipdbserv,addbserv,pserveur));	
+			}
+		catch(Exception e)
+		{
+			//erreur sql
+			e.printStackTrace();
+		}
 		
-		return "bdserveurlist";
+		return "redirect:/bdServeurList";
 	}
 	@GetMapping("/bdServeurConfig")
 	public String bdserveurConfig(HttpSession session,
@@ -96,6 +105,27 @@ public class BdServeurController {
 		//if(session.getAttribute("user")==null) return "redirect:/";
 		
 		model.addAttribute("bdserv", id_bdserveur);
+		model.addAttribute("ListDockerServeur", dockerserv.findBybdserveur(bdserv.getOne(Long.valueOf(id_bdserveur))));
+		
 		return "dockerList";
+	}
+	
+	@GetMapping("/bdServeurDeploy")
+	public String bdServeurDeploy(HttpSession session,
+			@RequestParam(value="bdserv",required=false)String id_bdserveur,
+			Model model)
+	{
+		//if(session.getAttribute("user")==null) return "redirect:/";
+		
+		if(id_bdserveur!=null && !id_bdserveur.isEmpty())
+		{
+			
+			
+			
+			List<BdServeur> bdserveur = bdserv.findByServeur(serv.getOne(Long.valueOf(id_bdserveur)));		
+			model.addAttribute("BdServeurList", bdserveur);
+		}
+		
+		return "redirect:/bdServeurList";
 	}
 }
