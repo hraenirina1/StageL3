@@ -48,7 +48,7 @@
                 <tbody>
                   <tr th:each="serv:${BdServeurList}">
                     <td>
-                      <a href="/bdServeurList" th:href="@{'/bdServeurList?serv=' + ${serv.id_bdServeur}}"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.nomBdServeur}"></span></font></font></a>
+                      <a href="/bdServeurList" th:href="@{'/bdServeurConfig?bdserv=' + ${serv.id_bdServeur}}"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.nomBdServeur}"></span></font></font></a>
                     </td>
                     <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.ip_externe.part1 + '.' + serv.ip_externe.part2 + '.' +serv.ip_externe.part3 + '.' + serv.ip_externe.part4 }"></span></font></font></td>
                     <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.adresseReseau.part1 + '.' + serv.adresseReseau.part2 + '.' +serv.adresseReseau.part3 + '.' + serv.adresseReseau.part4 + '/' + serv.masque }"></span></font></font></td>
@@ -56,7 +56,7 @@
                     <td>
                       <a href="/bdServeurDeploy" th:href="@{'/bdServeurDeploy?bdserv=' + ${serv.id_bdServeur}}" class="btn btn-success btn-xs"><i class="fa fa-check"></i></a>
                       <a href="/bdServeurConfig" th:href="@{'/bdServeurConfig?bdserv=' + ${serv.id_bdServeur}}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>
-                      <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i></button>
+                      <a href="/bdServeurDelete" th:href="@{'/bdServeurDelete?bdserv=' + ${serv.id_bdServeur}}" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i></a>
                     </td>
                   </tr>                  
                 </tbody>

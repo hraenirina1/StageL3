@@ -35,7 +35,7 @@ public class MainController {
 			@RequestParam("serv_port")String port,Model model) 
 					{		
 		
-		connectionssh = SshConnection.CreerConnection(new SshConfig(adr,user,pass,Integer.parseInt(port)));
+		//connectionssh = SshConnection.CreerConnection(new SshConfig(adr,user,pass,Integer.parseInt(port)));
 		
 		session.setAttribute("user", new Utilisateur(user,Integer.parseInt(port), adr));
 		return "home";

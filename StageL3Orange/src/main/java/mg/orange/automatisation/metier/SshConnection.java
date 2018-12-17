@@ -97,8 +97,6 @@ public class SshConnection {
 				e.printStackTrace();
 			}	
 	}
-	
-
 	public void ChangerConfig(SshConfig conf)
 	{
 		JSch ssh = new JSch();
@@ -116,5 +114,43 @@ public class SshConnection {
 		}		
 		
 	}
-
+	public int pinger(String adresse) throws Exception
+	{
+		//creation d'un terminal
+		Channel terminal;
+		try {
+			
+			terminal = session.openChannel("exec");
+			
+			//executer commande
+			((ChannelExec)terminal).setCommand("ping -w 2 " + adresse);
+			
+			//ouverture du terminal
+			terminal.connect();
+			
+	        while (true) {
+	            if (terminal.isClosed()) {
+	            	
+	            	//fermeture du terminal    
+	    			terminal.disconnect();
+	    			
+	            	return terminal.getExitStatus();	
+	            	
+	            	}
+	            
+	            try {
+	                Thread.sleep(1000);
+	            } catch (Exception ee) {
+	                System.out.println(ee);
+	            }
+	        }
+							
+			
+			
+			
+		} catch (JSchException e) {			
+			throw new Exception("Erreur fatale");
+		}
+		
+	}
 }

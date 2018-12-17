@@ -61,7 +61,7 @@
                 <tbody>
                   <tr th:each="serv:${ListDockerServeur}">
                     <td>
-                      <a href="/bdServeurList" th:href="@{'/bdServeurList?serv='}">
+                      <a href="/bdServeurList" th:href="@{'/dockerServeurConfig?dockerServ=' + ${serv.id_docker_serveur}}">
                       	<font style="vertical-align: inherit;">
                       		<font style="vertical-align: inherit;">
                       			<span th:utext="${serv.nom_docker_serveur}"></span>
@@ -75,7 +75,6 @@
                     </font></font></td>
                     <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.ip_docker.part1 + '.' + serv.ip_docker.part2 + '.' +serv.ip_docker.part3 + '.' + serv.ip_docker.part4 }"></span></font></font></td>
                     <td>
-                      <a href="/bdServeurDeploy" th:href="@{'/bdServeurDeploy?bdserv='}" class="btn btn-success btn-xs"><i class="fa fa-check"></i></a>
                       <a href="/bdServeurConfig" th:href="@{'/dockerServeurConfig?dockerServ=' + ${serv.id_docker_serveur}}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>
                       <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i></button>
                     </td>

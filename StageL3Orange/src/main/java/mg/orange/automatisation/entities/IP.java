@@ -65,5 +65,14 @@ public class IP {
 	public void setPart4(Integer part4) {
 		this.part4 = part4;
 	}
-
+	
+	@Override
+	public String toString()
+	{
+		return part1.toString() + "." + part2.toString() + "."  + part3.toString() + "." + part4.toString();
+	}
+	public String reseauTostring()
+	{
+		return part1.toString() + "." + part2.toString() + "."  + part3.toString() + ".";
+	}
 }

@@ -20,6 +20,9 @@ import mg.orange.automatisation.dao.ServeurDAO;
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.IP;
 import mg.orange.automatisation.entities.Serveur;
+import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.metier.Deployeur;
+import mg.orange.automatisation.metier.SshConnection;
 
 @Controller
 public class BdServeurController {
@@ -55,12 +58,11 @@ public class BdServeurController {
 		return "bdServeurList";
 	}
 	@GetMapping("/bdServeurAjout")
-	public String bdserveurAjout(HttpSession session,Model model)
+	public String bdserveurAjoutGet(HttpSession session,Model model)
 	{
 		//if(session.getAttribute("user")==null) return "redirect:/";
 		
 		model.addAttribute("serveur", serv.findAll());
-		System.out.println(serv.count());
 		return "AjoutBdServeur";
 	}
 	@RequestMapping(value="/BdServeurAjout",method=RequestMethod.POST)
@@ -76,6 +78,8 @@ public class BdServeurController {
 			@RequestParam("adServ4")String ad4,
 			@RequestParam("masque")String masque,
 			@RequestParam("idserveur")String serveur,
+			@RequestParam("mysqlPassword")String mysqlpassword,
+			@RequestParam("nomreseau")String nomReseau,
 			Model model)
 	{
 		//if(session.getAttribute("user")==null) return "redirect:/";
@@ -87,7 +91,7 @@ public class BdServeurController {
 		
 		Serveur pserveur = serv.findById(Long.valueOf(serveur)).get();
 		try {
-			bdserv.save(new BdServeur(nom,Integer.parseInt(masque),ipdbserv,addbserv,pserveur));	
+			bdserv.save(new BdServeur(nom,Integer.parseInt(masque),ipdbserv,nomReseau,addbserv,pserveur,mysqlpassword));	
 			}
 		catch(Exception e)
 		{
@@ -119,11 +123,32 @@ public class BdServeurController {
 		
 		if(id_bdserveur!=null && !id_bdserveur.isEmpty())
 		{
+			BdServeur bdserveur = bdserv.findById(Long.valueOf(id_bdserveur)).get();
+			SshConnection sshCon = SshConnection.CreerConnection(new SshConfig("127.0.0.1", "root", "123456",2022));
 			
+			if(sshCon!=null)
+			{
+				Deployeur deploy = new Deployeur(sshCon); 		
 			
+				//commande de deploiement 
+				deploy.ReelDeployer(bdserveur);
+			}
 			
-			List<BdServeur> bdserveur = bdserv.findByServeur(serv.getOne(Long.valueOf(id_bdserveur)));		
-			model.addAttribute("BdServeurList", bdserveur);
+		}
+		
+		return "redirect:/bdServeurList";
+	}
+	@GetMapping("/bdServeurDelete")
+	public String bdServeurDelete(HttpSession session,
+			@RequestParam(value="bdserv",required=false)String id_bdserveur,
+			Model model)
+	{
+		//if(session.getAttribute("user")==null) return "redirect:/";
+		
+		if(id_bdserveur!=null && !id_bdserveur.isEmpty())
+		{
+			BdServeur bdserveur = bdserv.findById(Long.valueOf(id_bdserveur)).get();
+			bdserv.delete(bdserveur);			
 		}
 		
 		return "redirect:/bdServeurList";

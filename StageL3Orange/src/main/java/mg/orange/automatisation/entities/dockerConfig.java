@@ -1,6 +1,7 @@
 package mg.orange.automatisation.entities;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,6 +19,7 @@ public class dockerConfig {
 	@JoinColumn
 	private Config configDocker;
 	
+	@Column(columnDefinition="TEXT")
 	private String Valeur;
 	
 	public dockerConfig() {
