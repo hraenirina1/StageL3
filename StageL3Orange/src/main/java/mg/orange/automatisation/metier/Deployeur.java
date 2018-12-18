@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mg.orange.automatisation.entities.BdServeur;
+import mg.orange.automatisation.entities.Reseau;
 import mg.orange.automatisation.entities.dockerConfig;
 import mg.orange.automatisation.entities.dockerserveur;
 
@@ -378,4 +379,20 @@ public class Deployeur {
 		return true;
 	}
 	
+	/********************************** Teste Reseau *********************************************************/
+	
+	public int testerReseau(String net) {
+		return sshConnex.ExecuterCommandeVerifRetour("docker network inspect " + net);
+	}
+	public int DeployerReseau(Reseau res)
+	{
+		if(res.getType().equals("local"))
+			return sshConnex.ExecuterCommandeVerifRetour("docker network create " + res.getNom_reseau() + " --subnet=" + res.getIp_reseau().toString() + "/" + res.getMasque_reseau());
+		else if(res.getType().equals("overlay"))
+		{
+			return sshConnex.ExecuterCommandeVerifRetour("docker network create --driver=overlay  --attachable " + res.getNom_reseau() + " --subnet=" + res.getIp_reseau().toString() + "/" + res.getMasque_reseau());
+		}
+		else return -1;	
+	}
+
 }

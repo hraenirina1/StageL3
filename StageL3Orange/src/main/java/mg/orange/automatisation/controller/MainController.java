@@ -17,7 +17,7 @@ public class MainController {
 	private SshConnection connectionssh; 
 	
 	//page de connexion
-	@GetMapping("/")
+	@GetMapping({"/","/index"})
 	public String Index(HttpSession session)
 	{
 		if(session.getAttribute("user")==null)
@@ -34,31 +34,26 @@ public class MainController {
 			@RequestParam("serv_pass")String pass,
 			@RequestParam("serv_port")String port,Model model) 
 					{		
+		//essai de connexion ssh
+		connectionssh = SshConnection.CreerConnection(new SshConfig(adr,user,pass,Integer.parseInt(port)));
 		
-		//connectionssh = SshConnection.CreerConnection(new SshConfig(adr,user,pass,Integer.parseInt(port)));
-		
-		session.setAttribute("user", new Utilisateur(user,Integer.parseInt(port), adr));
-		return "home";
-		
-//		if(connectionssh != null) 
-//		{
-//			session.setAttribute("user", new Utilisateur(user,Integer.parseInt(port), adr));
-//			return "home";
-//		}
-//		else
-//		{
-//			model.addAttribute("Erreur", "Impossible de se connecter !!");
-//			return "index";
-//		}	
+		//reponse au connexion ssh
+		if(connectionssh != null) {
+			session.setAttribute("user", new Utilisateur(user,Integer.parseInt(port), adr));
+			return "home";
+		}
+		else{
+			model.addAttribute("Erreur", " Impossible d'établir la connexion avec le serveur " + adr + ":" + port + " !");
+			return "index";
+		}
+
 		
 	}
 	@GetMapping("/connexion")
 	public String connexionGet(HttpSession session){
-		return "home";
-//		if(session.getAttribute("user")==null)
-//			return "index";
-//		else
-//			return "home";
+
+			return "redirect:/";
+
 	}
 	
 	//deconnexion
@@ -66,22 +61,6 @@ public class MainController {
 	public String Deconnection(HttpSession session)
 	{
 		session.invalidate();
-		return "index";
+		return "redirect:/";
 	}
-	
-	/* --------------------------------------------------------*/
-	
-	//page Principale
-	@GetMapping("/home")	
-	public String Principale(HttpSession session)
-	{
-		if(session.getAttribute("user")==null)
-			return "index";
-		else
-			return "home";
-	}
-	
-	
-	
-	
 }
