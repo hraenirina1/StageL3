@@ -2,12 +2,13 @@ package mg.orange.automatisation.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
 public class IP {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id_ip;
 	private Integer part1;
 	private Integer part2;
@@ -17,7 +18,19 @@ public class IP {
 	public IP() {
 		super();
 	}
-
+	
+	public static IP IPfromString(String ip) {
+		String[] ListPartIp = ip.split(".");
+		if(ip.contains("."))
+		{
+		System.out.println(ip);
+		}
+		if(ListPartIp.length == 4)
+		{
+			return new IP(Integer.valueOf(ListPartIp[0]),Integer.valueOf(ListPartIp[1]),Integer.valueOf(ListPartIp[2]),Integer.valueOf(ListPartIp[3]));
+		}
+		return null;
+	}
 	public IP(Integer part1, Integer part2, Integer part3, Integer part4) {
 		super();
 		this.part1 = part1;

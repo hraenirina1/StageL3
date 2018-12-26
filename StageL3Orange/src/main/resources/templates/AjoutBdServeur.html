@@ -58,13 +58,6 @@
                     </div>
                   </div>
                   
-                  <div class="form-group ">
-                    <label for="nomserveur" class="control-label col-lg-4"> Nom Reseau </label>
-                    <div class="col-lg-8">
-                      <input class=" form-control" id="nomserveur" name="nomreseau" type="text" required/>
-                    </div>
-                  </div>
-                  
                   <div class="form-group">
                     <label for="ipserveur1" class="control-label col-lg-4"> Adresse reseau </label>
                     <div class="col-lg-6">
@@ -80,6 +73,25 @@
                   </div>
                   
                   <div class="form-group ">
+                  <label class="control-label col-lg-4"> Type de Base de donnees </label>
+                  <div class="col-lg-8">
+                  <div class="radio col-lg-6">
+	                <label>
+	                  <input type="radio" name="reseauType" id="optionsRadios1" value="local" checked>
+	                  local
+	                  </label>
+	              </div>
+	              
+	              <div class="radio col-lg-6">
+	                <label>
+	                  <input type="radio" name="reseauType" id="optionsRadios2" value="overlay">
+	                  overlay
+	                  </label>
+	              </div>
+	              </div>
+	              </div>
+	              
+                  <div class="form-group ">
                     <label for="nomserveur" class="control-label col-lg-4"> Serveur Physique </label>
                     <div class="col-lg-8">
                       <select class="form-control col-lg-4 cocl-lg-offset-3" name="idserveur">
@@ -88,7 +100,6 @@
                     </div>
                   </div>
                   
-	                                   
                   <div class="form-group">
                     <div class="col-lg-offset-2 col-lg-10">
                       <button class="btn btn-theme col-lg-6" type="submit"> Ajouter </button>

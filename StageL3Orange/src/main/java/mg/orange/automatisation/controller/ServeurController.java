@@ -27,7 +27,7 @@ public class ServeurController {
 	@GetMapping("/serveurAjout")
 	public String ajoutGet(HttpSession session)
 	{
-		//if(session.getAttribute("user")==null) return "redirect:/";				
+		if(session.getAttribute("user")==null) return "redirect:/";				
 		return "Ajoutserveur";
 	}
 	@RequestMapping(value="/serveurAjout",method=RequestMethod.POST)
@@ -62,7 +62,7 @@ public class ServeurController {
 	@GetMapping("/serveurList")
 	public String list(HttpSession session,Model model) {
 		
-		//if(session.getAttribute("user")==null) return "redirect:/";
+		if(session.getAttribute("user")==null) return "redirect:/";
 		List<Serveur> listserveur = serveur.findAll();
 		model.addAttribute("listServeur", listserveur);	
 		

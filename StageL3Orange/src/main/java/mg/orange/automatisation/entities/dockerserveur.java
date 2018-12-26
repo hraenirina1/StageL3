@@ -6,6 +6,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -15,7 +16,7 @@ import javax.persistence.OneToOne;
 @Entity
 public class dockerserveur {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id_docker_serveur;
 	@Column(unique=true)
 	private String nom_docker_serveur;
@@ -24,6 +25,15 @@ public class dockerserveur {
 	@JoinColumn(name="id_ip_docker")
 	private IP ip_docker;
 	
+	@OneToOne(cascade = CascadeType.ALL)
+	private IP ip_interne;	
+	public IP getIp_interne() {
+		return ip_interne;
+	}
+	public void setIp_interne(IP ip_interne) {
+		this.ip_interne = ip_interne;
+	}
+
 	@OneToMany(cascade=CascadeType.ALL) 
 	@JoinColumn
 	private List<dockerConfig> dockerConfig;

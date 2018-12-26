@@ -1,85 +1,63 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+	<!-- Favicons -->
+	<link href="img/favicon.png" rel="icon">
+	<link href="img/apple-touch-icon.png" rel="apple-touch-icon">
+	
+	<!-- prerequis -->
 	<meta th:insert="prerequis">
 	<meta th:fragment="prerequis">
-	<meta charset="UTF-8">
+	
+	<!--external css-->
+  	<link href="style/font-awesome/css/font-awesome.css" rel="stylesheet" />
+  	
 	<title> Orange Madagascar </title>
 </head>
 <body>
-	<!-- body-->
-    <section id="container" class="sidebar-close">
-    
-    <div th:insert="entete"></div>
-	<div th:fragment="entete"></div>
-	
-	<div th:insert="sidemenu"></div>
-	<div th:fragment="sidemenu"></div>
-	
-	
-    <!-- **********************************************************************************************************************************************************
-        MAIN CONTENT
-        *********************************************************************************************************************************************************** -->
-    <!--main content start-->
-    <section id="main-content" style="margin-left: 210px;">
-      <section class="wrapper site-min-height">
-        <h3><i class="fa fa-angle-right"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> SERVEUR </font></font></h3>
-        <div class="row mt">
-          <div class="col-lg-8 col-lg-offset-2">
-          <!-- **********************************************************************************************************************************************************
-                *********************************************************************************************************************************************************** -->
-           
-           <h4><i class="fa fa-angle-right"></i> Ajout d'un serveur </h4>
-            <div class="form-panel">
+	<div class="login-page">
+		<div class="container">
+		<div class="form-panel col-xs-12">
               <div class="form">
                 <form class="cmxform form-horizontal style-form" id="signupForm" method="post" action="/serveurAjout">
                   <div class="form-group ">
-                    <label for="nomserveur" class="control-label col-lg-4"> Nom du serveur </label>
-                    <div class="col-lg-8">
+                    <label for="nomserveur" class="control-label col-xs-4"> Nom du serveur </label>
+                    <div class="col-xs-8">
                       <input class=" form-control" id="nomserveur" name="nomserveur" type="text" />
                     </div>
                   </div>
                   <div class="form-group">
-                    <label for="ipserveur1" class="control-label col-lg-4"> Ip du serveur </label>
+                    <label for="ipserveur1" class="control-label col-xs-4"> Ip du serveur </label>
                     <div class="col-lg-8">
-                      <input class="col-xs-3 text-center" id="ipserveur1" name="ipserveur1" type="number" min="0" max="255" />
-                      <input class="col-xs-3 text-center" id="ipserveur2" name="ipserveur2" type="number" min="0" max="255" />
-                      <input class="col-xs-3 text-center" id="ipserveur3" name="ipserveur3" type="number" min="0" max="255" />
-                      <input class="col-xs-3 text-center" id="ipserveur4" name="ipserveur4" type="number" min="0" max="255" />
+                      <input th:value="${ip.part1}" class="col-xs-3 text-center" id="ipserveur1" name="ipserveur1" type="number" min="0" max="255" readonly="readonly"/>
+                      <input th:value="${ip.part2}" class="col-xs-3 text-center" id="ipserveur2" name="ipserveur2" type="number" min="0" max="255" readonly="readonly"/>
+                      <input th:value="${ip.part3}" class="col-xs-3 text-center" id="ipserveur3" name="ipserveur3" type="number" min="0" max="255" readonly="readonly"/>
+                      <input th:value="${ip.part4}" class="col-xs-3 text-center" id="ipserveur4" name="ipserveur4" type="number" min="0" max="255" readonly="readonly"/>
                     </div>
                   </div>
                   
                   <div class="form-group">
                     <div class="col-lg-offset-2 col-lg-10">
-                      <button class="btn btn-theme col-lg-6" type="submit"> Ajouter </button>
-                      <button class="btn btn-theme04 col-lg-6" type="button"> Annuler </button>
+                      <button class="btn btn-theme col-lg-6" type="submit"> Enregister </button>
+
                     </div>
                   </div>
                 </form>
               </div>
             </div>
-            <!-- /form-panel -->
-          </div>
-          <!-- /col-lg-12 -->
-        </div>
-           
-           
-                      
-           <!-- **********************************************************************************************************************************************************
-           *********************************************************************************************************************************************************** -->
-          </div>
-        </div>
-      </section>
-      <!-- /wrapper -->
-    </section>
-    <!-- /MAIN CONTENT -->
-    <!--main content end-->
-  	
-  	<div th:insert="pied"></div>
-	<div th:fragment="pied"></div>  
-  </section>
-    
-	<p th:insert="script"></p>
-	<p th:fragment="script"></p>
+   </div>
+   </div>  
+    <!-- js placed at the end of the document so the pages load faster -->	  
+	  <script src="script/jquery-1.10.2.js"></script>
+	  <script src="script/bootstrap.js"></script>
+  
+  <!-- You can use an image of whatever size. This script will stretch to fit in any screen size.-->
+  <script type="text/javascript" src="script/jquery.backstretch.min.js"></script>  
+  <script>
+    $.backstretch("img/bg.jpg", {
+      speed: 500
+    });
+  </script>
+
 </body>
 </html>

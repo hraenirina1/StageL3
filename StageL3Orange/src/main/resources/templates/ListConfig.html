@@ -30,54 +30,32 @@
           <!-- **********************************************************************************************************************************************************
                 *********************************************************************************************************************************************************** -->
 
-           <h4><i class="fa fa-angle-right"></i> Liste des contaigners dockers </h4>
+           <h4><i class="fa fa-angle-right"></i> Liste des configurations du contaigners </h4>
            <div class="form-panel">
-              
-              <div class="form">
-                <form class="cmxform form-horizontal style-form" id="signupForm" method="post" action="/dockerServeurAjout">
-                
-                  <div class="form-group col-lg-12">
-                    <label for="nomserveur" class="control-label col-lg-6"> Nombre de serveur à deployer </label>
-                    <div class="col-lg-2">
-                      <input class=" form-control" id="nomserveur" name="nbServ" type="number" required/>
-                      <input class=" form-control" id="nomserveur" name="bdServ" type="hidden" th:attr="value=${bdserv}" required/>
-                    </div>
-                    <div class="col-lg-4">
-                      <button class="btn btn-theme col-lg-12" type="submit"> Ajouter </button>                      
-                    </div>
-                  </div>
-                </form>
-              </div>
-
    			<table class="table table-striped table-advance table-hover">
                <thead>
                   <tr>
-                    <th><i class="fa fa-desktop"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Nom du docker serveur </font></font></th>
-                    <th><i class="fa fa-desktop"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Nom de la Cluster </font></font></th>
-                    <th class="hidden-phone"><i class=""></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Adresse ip </font></font></th>
-                    <th class="hidden-phone"><i class=""></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Adresse interne </font></font></th>
-                    <th></th>
+                    <th><i class="fa fa-desktop"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> configuration </font></font></th>
+                    <th><i class="fa fa-desktop"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> valeur </font></font></th>
+					<th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr th:each="serv:${ListDockerServeur}">
+                  <tr th:each="conf:${listconfig}">
                     <td>
-                      <a href="/bdServeurList" th:href="@{'/dockerServeurConfig?dockerServ=' + ${serv.id_docker_serveur}}">
+                      <a href="/bdServeurList" th:href="@{'/dockerServeurConfig?dockerServ='}">
                       	<font style="vertical-align: inherit;">
                       		<font style="vertical-align: inherit;">
-                      			<span th:utext="${serv.nom_docker_serveur}"></span>
+                      			<span th:utext="${conf.configDocker.mot_cle}"></span>
                       		</font>
                       	</font>
                      </a>
                     </td>
-                    <!-- + '(' + serv.bdserveur.ip_externe.part1 + '.'+ serv.bdserveur.ip_externe.part2 + '.'+ serv.bdserveur.ip_externe.part3 + '.'+ serv.bdserveur.ip_externe.part4 + ')' -->
                     <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
-                    	<span th:utext="${serv.bdserveur.nomBdServeur}"></span>
+                    	<span th:utext="${conf.valeur}"></span>
                     </font></font></td>
-                    <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.ip_docker.part1 + '.' + serv.ip_docker.part2 + '.' +serv.ip_docker.part3 + '.' + serv.ip_docker.part4 }"></span></font></font></td>
-                    <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.ip_interne.part1 + '.' + serv.ip_interne.part2 + '.' +serv.ip_interne.part3 + '.' + serv.ip_interne.part4 }"></span></font></font></td>
                     <td>
-                      <a href="/bdServeurConfig" th:href="@{'/dockerServeurConfig?dockerServ=' + ${serv.id_docker_serveur}}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>
+                      <a href="/bdServeurConfig" th:href="@{'/dockerServeurConfig?dockerServ='}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>
                       <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i></button>
                     </td>
                   </tr>                  

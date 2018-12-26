@@ -6,6 +6,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -15,7 +16,7 @@ import javax.persistence.OneToOne;
 public class Reseau {
 	
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(length=6)
 	private Long id_reseau;
 	public Long getId_reseau() {
@@ -34,8 +35,7 @@ public class Reseau {
 	public void setNom_reseau(String nom_reseau) {
 		this.nom_reseau = nom_reseau;
 	}
-	
-	
+		
 	@OneToOne(cascade=CascadeType.ALL)
 	@JoinColumn(nullable=false)
 	private IP ip_reseau;

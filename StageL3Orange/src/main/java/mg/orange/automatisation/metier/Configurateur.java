@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.executable.ExecutableValidator;
+
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.Config;
 import mg.orange.automatisation.entities.IP;
@@ -51,14 +53,15 @@ public class Configurateur {
 			}
 		return Adresse_ip;
 	}
-	public List<dockerserveur> configurer(BdServeur bd,int nb_docker,List<Config> configBase)
+	public List<dockerserveur> configurer(BdServeur bd,int nb_docker,List<Config> configBase) throws Exception
 	{
 		List<dockerserveur> dockers = new ArrayList<>(); 
 		
 		//scanner Ip
 		List<IP> adresseIp;
-		
+		List<IP> adresseIpInterne;
 		try {
+			adresseIpInterne = scannerIp(nb_docker,bd.getReseau().getIp_reseau(),bd.getReseau().getMasque_reseau());
 			adresseIp = scannerIp(nb_docker,bd.getAdresseReseau(),bd.getMasque());
 			
 			//creation des dockerserveurs
@@ -66,81 +69,88 @@ public class Configurateur {
 			for (IP ip : adresseIp) {
 				
 				dockerserveur docker = new dockerserveur(bd.getNomBdServeur() + "-galera-" + i,ip,bd);
-			
-				List<dockerConfig> dconf = new ArrayList<>();
-				
-				for (Config conf1 : configBase) {
-					
-					switch (conf1.getMot_cle()) {
-					
-					case "WSREP_ON":
-						dconf.add(new dockerConfig(conf1, "ON"));									
-						break;
-					
-					case "WSREP_PROVIDER":
-						dconf.add(new dockerConfig(conf1, "/usr/lib64/galera/libgalera_smm.so"));	
-						break;
-					
-					case "WSREP_PROVIDER_OPTIONS":
-						dconf.add(new dockerConfig(conf1, ""));	
-						break;
-						
-					case "WSREP_CLUSTER_ADDRESS":
-						String valeur = "'gcomm://";
-						valeur += adresseIp.get(0);
-						
-						for(int j=1;j < adresseIp.size();j++) {
-							valeur +="," + adresseIp.get(j);
-						};
-						
-						dconf.add(new dockerConfig(conf1, valeur + "'"));	
-						break;					
-						
-					case "WSREP_CLUSTER_NAME":
-						dconf.add(new dockerConfig(conf1, "'" + bd.getNomBdServeur() + "'"));	
-						break;
-						
-					case "WSREP_NODE_ADDRESS":
-						dconf.add(new dockerConfig(conf1, "'" + ip.toString() + "'"));
-						break;
-						
-					case "WSREP_NODE_NAME":
-						dconf.add(new dockerConfig(conf1, "'" + docker.getNom_docker_serveur() + "'"));	
-						break;
-						
-					case "WSREP_SST_METHOD":
-						dconf.add(new dockerConfig(conf1, "rsync"));	
-						break;
-						
-					case "BINLOG_FORMAT":
-						dconf.add(new dockerConfig(conf1, "row"));	
-						break;
-						
-					case "DEFAULT_STORAGE_ENGINE":
-						dconf.add(new dockerConfig(conf1, "InnoDB"));	
-						break;
-						
-					case "INNODB_AUTOINC_LOCK_MODE":
-						dconf.add(new dockerConfig(conf1, "2"));	
-						break;
-						
-					case "BIND_ADDRESS":
-						dconf.add(new dockerConfig(conf1, "0.0.0.0"));	
-						break;
-						
-					case "MYSQL_ROOT_PASSWORD":
-						dconf.add(new dockerConfig(conf1, bd.getMysqlPasssword()));	
-						break;
+				docker.setIp_interne(adresseIpInterne.get(i-1));
+				SshConnection sshCon = SshConnection.CreerConnection(ssh);
+				if(sshCon!=null)
+				{
+					if(sshCon.ExecuterCommandeVerifRetour("ifconfig enp0s8 add " + docker.getIp_docker().toString())==0)
+					{
+							List<dockerConfig> dconf = new ArrayList<>();
+							if(configBase.size()==0) throw new Exception("pas de configuration");
+							for (Config conf1 : configBase) {
+								
+								switch (conf1.getMot_cle()) {
+								
+								case "WSREP_ON":
+									dconf.add(new dockerConfig(conf1, "ON"));									
+									break;
+								
+								case "WSREP_PROVIDER":
+									dconf.add(new dockerConfig(conf1, "/usr/lib64/galera/libgalera_smm.so"));	
+									break;
+								
+								case "WSREP_PROVIDER_OPTIONS":
+									dconf.add(new dockerConfig(conf1, ""));	
+									break;
+									
+								case "WSREP_CLUSTER_ADDRESS":
+									String valeur = "'gcomm://";
+									valeur += adresseIpInterne.get(0);
+									
+									for(int j=1;j < adresseIpInterne.size();j++) {
+										valeur +="," + adresseIpInterne.get(j);
+									};
+									
+									dconf.add(new dockerConfig(conf1, valeur + "'"));	
+									break;					
+									
+								case "WSREP_CLUSTER_NAME":
+									dconf.add(new dockerConfig(conf1, "'" + bd.getNomBdServeur() + "'"));	
+									break;
+									
+								case "WSREP_NODE_ADDRESS":
+									dconf.add(new dockerConfig(conf1, "'" + adresseIpInterne.get(i-1) + "'"));
+									break;
+									
+								case "WSREP_NODE_NAME":
+									dconf.add(new dockerConfig(conf1, "'" + docker.getNom_docker_serveur() + "'"));	
+									break;
+									
+								case "WSREP_SST_METHOD":
+									dconf.add(new dockerConfig(conf1, "rsync"));	
+									break;
+									
+								case "BINLOG_FORMAT":
+									dconf.add(new dockerConfig(conf1, "row"));	
+									break;
+									
+								case "DEFAULT_STORAGE_ENGINE":
+									dconf.add(new dockerConfig(conf1, "InnoDB"));	
+									break;
+									
+								case "INNODB_AUTOINC_LOCK_MODE":
+									dconf.add(new dockerConfig(conf1, "2"));	
+									break;
+									
+								case "BIND_ADDRESS":
+									dconf.add(new dockerConfig(conf1, "0.0.0.0"));	
+									break;
+									
+								case "MYSQL_ROOT_PASSWORD":
+									dconf.add(new dockerConfig(conf1, bd.getMysqlPasssword()));	
+									break;
 
-					default:
-						System.out.println(conf1.getMot_cle());
-						break;
-					}				
+								default:
+									System.out.println(conf1.getMot_cle());
+									break;
+								}				
+							}
+							
+							docker.setDockerConfig(dconf);
+							dockers.add(docker);
+							i++;
+						}
 				}
-				
-				docker.setDockerConfig(dconf);
-				dockers.add(docker);
-				i++;
 			}
 			
 		} catch (Exception e) {

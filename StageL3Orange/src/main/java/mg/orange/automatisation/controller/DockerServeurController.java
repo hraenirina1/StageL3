@@ -34,7 +34,7 @@ public class DockerServeurController {
 	public String dockerServeurAjout(HttpSession session,
 	@RequestParam("bdServ") String id_bdserveur,
 	@RequestParam("nbServ") String nb_DockerServeur,
-			Model model)
+			Model model) throws NumberFormatException, Exception
 	{
 		//if(session.getAttribute("user")==null) return "redirect:/";		
 			
@@ -61,13 +61,9 @@ public class DockerServeurController {
 		
 		dockerserveur dockerserveurs = dockerserv.findById(Long.valueOf(id_dockerServeur)).get();
 		List<dockerConfig> conf = dockerserveurs.getDockerConfig();
-		
-		for (dockerConfig dockerCon : conf) {
-			System.out.println(dockerCon.getConfigDocker().getMot_cle());
-			System.out.println(dockerCon.getValeur());
-		}		
-		
-		return "index";	
+	
+		model.addAttribute("listconfig",conf);
+		return "ListConfig";	
 	}
 	
 }

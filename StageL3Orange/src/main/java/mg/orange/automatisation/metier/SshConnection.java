@@ -11,6 +11,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
 import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.exception.sshException;
 
 public class SshConnection {
 	
@@ -26,23 +27,23 @@ public class SshConnection {
 		this.session = session;
 	}
 
-	public static SshConnection CreerConnection(SshConfig conf)
+	public static SshConnection CreerConnection(SshConfig conf) throws sshException
 	{
 		JSch ssh = new JSch();
 
 		try {
-			Session session = ssh.getSession(conf.getUsername(), conf.getHost(),conf.getPort());
-			session.setPassword(conf.getPassword());
-			session.setConfig ("StrictHostKeyChecking", "no");
-			session.connect();
+				Session session = ssh.getSession(conf.getUsername(), conf.getHost(),conf.getPort());
+				session.setPassword(conf.getPassword());
+				session.setConfig ("StrictHostKeyChecking", "no");
+				session.connect();
 			
 			return new SshConnection(conf,session);
 		} catch (JSchException e) {
-			e.printStackTrace();
-			return null;
-		}		
+			throw new sshException(e.getMessage());
+		}
 		
 	}
+	
 	public SshConfig getConfig() {
 		return config;
 	}
