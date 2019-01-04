@@ -75,12 +75,12 @@ public class BdServeur {
 	
 	
 	//status
-	private String Status;//travail // deploy // up // down
+	private String status;//travail // deploy // up // down
 	public String getStatus() {
-		return Status;
+		return status;
 	}
 	public void setStatus(String status) {
-		Status = status;
+		this.status = status;
 	}
 	
 	
@@ -151,7 +151,7 @@ public class BdServeur {
 		this.masque = masque;
 		this.ip_externe = ip_externe;
 		this.adresseReseau = adresseReseau;
-		Status = status;
+		this.status = status;
 		this.serveur = serveur;
 		this.mysqlPasssword = mysqlPasssword;
 		this.reseau = reseau;

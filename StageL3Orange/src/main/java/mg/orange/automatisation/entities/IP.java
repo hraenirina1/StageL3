@@ -20,14 +20,13 @@ public class IP {
 	}
 	
 	public static IP IPfromString(String ip) {
-		String[] ListPartIp = ip.split(".");
+		String[] ListPartIp = ip.split("\\.");
 		if(ip.contains("."))
 		{
-		System.out.println(ip);
-		}
-		if(ListPartIp.length == 4)
-		{
-			return new IP(Integer.valueOf(ListPartIp[0]),Integer.valueOf(ListPartIp[1]),Integer.valueOf(ListPartIp[2]),Integer.valueOf(ListPartIp[3]));
+			if(ListPartIp.length == 4)
+			{
+				return new IP(Integer.valueOf(ListPartIp[0]),Integer.valueOf(ListPartIp[1]),Integer.valueOf(ListPartIp[2]),Integer.valueOf(ListPartIp[3]));
+			}
 		}
 		return null;
 	}

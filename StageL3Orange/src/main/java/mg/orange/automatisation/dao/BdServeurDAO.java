@@ -8,6 +8,8 @@ import mg.orange.automatisation.entities.Reseau;
 import mg.orange.automatisation.entities.Serveur;
 
 public interface BdServeurDAO extends JpaRepository<BdServeur, Long> {
+	public List<BdServeur> findByServeurAndStatus(Serveur serv,String Status);
 	public List<BdServeur> findByServeur(Serveur serv);
+	public List<BdServeur> findByStatus(String Status);
 	public List<BdServeur> findByReseau(Reseau reseau);
 }

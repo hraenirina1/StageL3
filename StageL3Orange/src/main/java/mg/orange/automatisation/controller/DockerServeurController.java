@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import mg.orange.automatisation.dao.BdServeurDAO;
 import mg.orange.automatisation.dao.ConfigDao;
 import mg.orange.automatisation.dao.DockerServeurDAO;
+import mg.orange.automatisation.dao.IPDAO;
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.entities.dockerConfig;
 import mg.orange.automatisation.entities.dockerserveur;
 import mg.orange.automatisation.metier.Configurateur;
@@ -29,21 +31,23 @@ public class DockerServeurController {
 	private DockerServeurDAO dockerserv; 
 	@Autowired
 	private ConfigDao config;
-	
+	@Autowired
+	private IPDAO ip;
 	@RequestMapping("/dockerServeurAjout")
 	public String dockerServeurAjout(HttpSession session,
 	@RequestParam("bdServ") String id_bdserveur,
 	@RequestParam("nbServ") String nb_DockerServeur,
 			Model model) throws NumberFormatException, Exception
 	{
-		//if(session.getAttribute("user")==null) return "redirect:/";		
+		if(session.getAttribute("user")==null) return "redirect:/";		
 			
 		//recuperer la base de donnees
 		BdServeur bd = bdserv.findById(Long.valueOf(id_bdserveur)).get();
 		
 		//configurer les serveurs dockers
-		Configurateur configurateur = new Configurateur(new SshConfig("127.0.0.1","root","123456",2022));
-		List<dockerserveur> dockers = configurateur.configurer(bd, Integer.parseInt(nb_DockerServeur), config.findByType("Base"));
+		Utilisateur user = (Utilisateur) session.getAttribute("user");
+		Configurateur configurateur = new Configurateur(new SshConfig(user));
+		List<dockerserveur> dockers = configurateur.configurer(bd, Integer.parseInt(nb_DockerServeur), config.findByType("Base"),ip);
 		
 		for (dockerserveur dockerserveur : dockers) {
 			dockerserv.save(dockerserveur);
@@ -57,7 +61,7 @@ public class DockerServeurController {
 	@RequestParam("dockerServ") String id_dockerServeur,
 			Model model)
 	{
-		//if(session.getAttribute("user")==null) return "redirect:/";
+		if(session.getAttribute("user")==null) return "redirect:/";
 		
 		dockerserveur dockerserveurs = dockerserv.findById(Long.valueOf(id_dockerServeur)).get();
 		List<dockerConfig> conf = dockerserveurs.getDockerConfig();

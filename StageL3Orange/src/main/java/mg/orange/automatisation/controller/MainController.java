@@ -17,9 +17,11 @@ import mg.orange.automatisation.entities.SshConfig;
 import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.exception.sshException;
 import mg.orange.automatisation.metier.SshConnection;
+import mg.orange.automatisation.metier.Superviseur;
 
 @Controller
 public class MainController {
+	@SuppressWarnings("unused")
 	private SshConnection connectionssh; 
 	@Autowired
 	private IPDAO ipdao; 
@@ -45,32 +47,31 @@ public class MainController {
 		try {
 			
 			//essai de connexion ssh
-			connectionssh = SshConnection.CreerConnection(new SshConfig(adr,user,pass,Integer.parseInt(port)));
+			//connectionssh = SshConnection.CreerConnection(new SshConfig(adr,user,pass,Integer.parseInt(port)));
 			
+			//recuperer l'adresse ip
+			IP ip = IP.IPfromString(adr);
+			
+			List<IP> listip = ipdao.findByPart1AndPart2AndPart3AndPart4AllIgnoreCase(ip.getPart1(), ip.getPart2(), ip.getPart3(), ip.getPart4());
+			
+			//reponse au connexion ssh
+			session.setAttribute("user", new Utilisateur(user,Integer.parseInt(port), adr,pass));
+			
+			if(listip.size()==0)
+			{
+				model.addAttribute("ip", ip);
+				return "Ajoutserveur";
+			}
+			else
+			{
+				return "home";
+			}
+				
 		}
-		catch(sshException e){
+		catch(Exception e) {//sshException e){
 			model.addAttribute("Erreur", " Impossible d'établir la connexion avec le serveur " + adr + ":" + port + " !" + e.getMessage());
 			return "index";
-		}
-		
-		//recuperer l'adresse ip
-		IP ip = IP.IPfromString(adr);
-		System.out.println(ip.getPart1().toString() + ip.getPart2().toString() + ip.getPart3().toString() + ip.getPart4().toString());
-		
-		//List<IP> listip = ipdao.findByPart1AndPart2AndPart3AndPart4AllIgnoreCase(ip.getPart1(), ip.getPart2(), ip.getPart3(), ip.getPart4());
-		
-		//reponse au connexion ssh
-		session.setAttribute("user", new Utilisateur(user,Integer.parseInt(port), adr));
-		
-//		if(listip.size()==0)
-//		{
-//			model.addAttribute("ip", ip);
-//			return "Ajoutserveur";
-//		}
-//		else
-//		{
-			return "home";
-//		}
+		}		
 	}
 	@GetMapping("/connexion")
 	public String connexionGet(HttpSession session){
@@ -84,4 +85,31 @@ public class MainController {
 		session.invalidate();
 		return "redirect:/";
 	}
+
+	//test
+	@GetMapping("/test")	
+	public String test(HttpSession session,
+				@RequestParam("ip")String ip
+				)
+		{   
+			
+			
+			if(Superviseur.testMysql(ip))
+			{
+				System.out.println("velona");
+			}
+			else
+				System.out.println("maty");
+			return "redirect:/";
+		}
+	
+	@GetMapping("/supervision")	
+	public String supervision(HttpSession session,
+				Model model)
+		{   		
+		
+			
+			return "supervision";
+		}
+
 }

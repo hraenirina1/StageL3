@@ -11,7 +11,14 @@ public class SshConfig {
 		// TODO Auto-generated constructor stub
 	}
 	
-
+	public SshConfig(Utilisateur user)
+	{
+		this.host = user.getAdresse();
+		this.username = user.getUser();
+		this.password = user.getPassword();
+		this.port = user.getPort();
+	}
+	
 	public SshConfig(String host, String username, String password, int port) {
 		super();
 		this.host = host;
@@ -57,5 +64,14 @@ public class SshConfig {
 
 	public void setPort(int port) {
 		this.port = port;
+	}
+	
+	public void setUser(Utilisateur user)
+	{
+		this.host = user.getAdresse();
+		this.username = user.getUser();
+		this.password = user.getPassword();
+		this.port = user.getPort();
+		
 	}
 }

@@ -4,9 +4,15 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import javax.validation.executable.ExecutableValidator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
+import mg.orange.automatisation.dao.IPDAO;
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.Config;
 import mg.orange.automatisation.entities.IP;
@@ -17,14 +23,13 @@ import mg.orange.automatisation.entities.dockerserveur;
 public class Configurateur {
 
 	private SshConfig ssh;	
-
 	public Configurateur(SshConfig ssh) {
 		super();
 		this.ssh = ssh;
 	}
 	
 	/////// hyper important 
-	public List<IP> scannerIp(int nb_adresse,IP reseau,int Masque) throws Exception
+	public List<IP> scannerIp(int nb_adresse,IP reseau,int Masque,IPDAO ip) throws Exception
 	{
 		List<IP> Adresse_ip = new ArrayList<>();	
 		List<IP> ip_total = recupIp(reseau,Masque);
@@ -36,9 +41,13 @@ public class Configurateur {
 					InetAddress ad;
 					
 					try {						
-						ad = InetAddress.getByName(ip_total.get(k).toString());
-
-						if(ping(ad.getHostAddress())==false) {
+						ad = InetAddress.getByName(ip_total.get(k).toString());		
+						
+						//teste si adresse ip libre
+						if(ping(ad.getHostAddress())==false && ip.findByPart1AndPart2AndPart3AndPart4AllIgnoreCase(ip_total.get(k).getPart1(), 
+								ip_total.get(k).getPart2(), 
+								ip_total.get(k).getPart3(), 
+								ip_total.get(k).getPart4()).size()==0) {
 							{
 								Adresse_ip.add(ip_total.get(k));	
 								k++;
@@ -53,7 +62,7 @@ public class Configurateur {
 			}
 		return Adresse_ip;
 	}
-	public List<dockerserveur> configurer(BdServeur bd,int nb_docker,List<Config> configBase) throws Exception
+	public List<dockerserveur> configurer(BdServeur bd,int nb_docker,List<Config> configBase,IPDAO ipdao) throws Exception
 	{
 		List<dockerserveur> dockers = new ArrayList<>(); 
 		
@@ -61,8 +70,8 @@ public class Configurateur {
 		List<IP> adresseIp;
 		List<IP> adresseIpInterne;
 		try {
-			adresseIpInterne = scannerIp(nb_docker,bd.getReseau().getIp_reseau(),bd.getReseau().getMasque_reseau());
-			adresseIp = scannerIp(nb_docker,bd.getAdresseReseau(),bd.getMasque());
+			adresseIpInterne = scannerIp(nb_docker,bd.getReseau().getIp_reseau(),bd.getReseau().getMasque_reseau(),ipdao);
+			adresseIp = scannerIp(nb_docker,bd.getAdresseReseau(),bd.getMasque(),ipdao);
 			
 			//creation des dockerserveurs
 			int i = 1;

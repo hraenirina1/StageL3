@@ -1,8 +1,6 @@
 package mg.orange.automatisation.controller;
 
 import java.util.List;
-import java.util.Optional;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import mg.orange.automatisation.dao.BdServeurDAO;
 import mg.orange.automatisation.dao.ConfigDao;
 import mg.orange.automatisation.dao.DockerServeurDAO;
-import mg.orange.automatisation.dao.IPDAO;
 import mg.orange.automatisation.dao.ReseauDAO;
 import mg.orange.automatisation.dao.ServeurDAO;
 import mg.orange.automatisation.entities.BdServeur;
@@ -25,6 +22,7 @@ import mg.orange.automatisation.entities.IP;
 import mg.orange.automatisation.entities.Reseau;
 import mg.orange.automatisation.entities.Serveur;
 import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.exception.sshException;
 import mg.orange.automatisation.metier.Deployeur;
 import mg.orange.automatisation.metier.SshConnection;
@@ -48,7 +46,7 @@ public class BdServeurController {
 			@RequestParam(value="serv",required=false)String id_serveur,
 			Model model)
 	{
-		//if(session.getAttribute("user")==null) return "redirect:/";
+		if(session.getAttribute("user")==null) return "redirect:/";
 		
 		if(id_serveur!=null && !id_serveur.isEmpty())
 		{
@@ -64,6 +62,49 @@ public class BdServeurController {
 		
 		return "bdServeurList";
 	}
+	@GetMapping("/bdServeurDeployer")
+	public String bdserveurListDeploy(HttpSession session,
+			@RequestParam(value="serv",required=false)String id_serveur,
+			Model model)
+	{
+		if(session.getAttribute("user")==null) return "redirect:/";
+		
+		if(id_serveur!=null && !id_serveur.isEmpty())
+		{
+			List<BdServeur> bdserveur = bdserv.findByServeurAndStatus(serv.getOne(Long.valueOf(id_serveur)),"deploy");		
+			model.addAttribute("BdServeurList", bdserveur);
+		}
+		else
+		{
+			List<BdServeur> bdserveur = bdserv.findByStatus("deploy");		
+			model.addAttribute("BdServeurList", bdserveur);
+		}
+		
+		
+		return "bdServeurList";
+	}
+	@GetMapping("/bdServeurEncours")
+	public String bdserveurListTravail(HttpSession session,
+			@RequestParam(value="serv",required=false)String id_serveur,
+			Model model)
+	{
+		if(session.getAttribute("user")==null) return "redirect:/";
+		
+		if(id_serveur!=null && !id_serveur.isEmpty())
+		{
+			List<BdServeur> bdserveur = bdserv.findByServeurAndStatus(serv.getOne(Long.valueOf(id_serveur)),"travail");		
+			model.addAttribute("BdServeurList", bdserveur);
+		}
+		else
+		{
+			List<BdServeur> bdserveur = bdserv.findByStatus("travail");		
+			model.addAttribute("BdServeurList", bdserveur);
+		}
+				
+		return "bdServeurList";
+	}
+	
+	
 	@GetMapping("/bdServeurAjout")
 	public String bdserveurAjoutGet(HttpSession session,Model model)
 	{
@@ -97,7 +138,8 @@ public class BdServeurController {
 		IP ipdbserv = new IP(Integer.parseInt(ip1),Integer.parseInt(ip2),Integer.parseInt(ip3),Integer.parseInt(ip4));
 		IP addbserv = new IP(Integer.parseInt(ad1),Integer.parseInt(ad2),Integer.parseInt(ad3),Integer.parseInt(ad4));		
 		
-		SshConnection sshCon = SshConnection.CreerConnection(new SshConfig("127.0.0.1", "root", "123456",2022));		
+		Utilisateur user = (Utilisateur) session.getAttribute("user");
+			SshConnection sshCon = SshConnection.CreerConnection(new SshConfig(user));		
 		
 		Deployeur deploy = new Deployeur(sshCon);
 		
@@ -133,8 +175,6 @@ public class BdServeurController {
 				System.out.println("Impossible de creer le reseau !!");
 				session.setAttribute("Erreur", "Impossible de creer le reseau !!");
 			}
-			
-			
 		}
 		else
 		{
@@ -173,14 +213,19 @@ public class BdServeurController {
 			if(id_bdserveur!=null && !id_bdserveur.isEmpty())
 			{
 				BdServeur bdserveur = bdserv.findById(Long.valueOf(id_bdserveur)).get();
-				SshConnection sshCon = SshConnection.CreerConnection(new SshConfig("127.0.0.1", "root", "123456",2022));
+				Utilisateur user = (Utilisateur) session.getAttribute("user");
+				SshConnection sshCon = SshConnection.CreerConnection(new SshConfig(user));
 				
 				if(sshCon!=null)
 				{
 					Deployeur deploy = new Deployeur(sshCon); 		
 				
 					//commande de deploiement 
-					deploy.ReelDeployer(bdserveur);
+					if(deploy.ReelDeployer(bdserveur))
+					{
+						bdserveur.setStatus("deploy");
+						bdserv.save(bdserveur);
+					}
 				}
 				
 			}

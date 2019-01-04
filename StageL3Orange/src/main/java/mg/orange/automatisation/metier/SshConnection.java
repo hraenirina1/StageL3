@@ -65,6 +65,7 @@ public class SshConnection {
 					
 					//executer commande
 					((ChannelExec)terminal).setCommand(commande);
+					System.out.println(commande);
 					
 					//ouverture du terminal
 					terminal.connect();

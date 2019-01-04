@@ -12,6 +12,7 @@ import mg.orange.automatisation.dao.BdServeurDAO;
 import mg.orange.automatisation.dao.ReseauDAO;
 import mg.orange.automatisation.entities.Reseau;
 import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.exception.sshException;
 import mg.orange.automatisation.metier.Deployeur;
 import mg.orange.automatisation.metier.SshConnection;
@@ -42,7 +43,10 @@ public class ReseauController {
 		Reseau res = reseau.findById(Long.valueOf(id_reseau)).get();
 		
 		try {
-			SshConnection sshCon = SshConnection.CreerConnection(new SshConfig("127.0.0.1", "root", "123456",2022));
+			
+			Utilisateur user = (Utilisateur) session.getAttribute("user");
+			SshConnection sshCon = SshConnection.CreerConnection(new SshConfig(user));
+			
 			Deployeur deploy = new Deployeur(sshCon);
 			System.out.println(bdserv.findByReseau(res).size());
 			if(bdserv.findByReseau(res).size()==0)

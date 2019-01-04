@@ -46,12 +46,31 @@ public class Deployeur {
 		
 		CreerDeployer("MariaConf/deploy.sh",bdServeur);
 		
-		commandes.add("cd MariaConf && bash deploy.sh");
+		Boolean exit_status = sshConnex.ExecuterCommandeVerifRetour("cd MariaConf && bash deploy.sh")==0?true:false;
+		
+		//demarage ssh
+		for(dockerserveur doc: bdServeur.getDserveur())
+		{
+			commandes.add("echo /sbin/sshd-keygen > script.sh");
+			commandes.add("echo /sbin/sshd >> script.sh");
+			
+			commandes.add("echo \""+bdServeur.getMysqlPasssword() + "\" >> mdp");
+			commandes.add("echo \""+bdServeur.getMysqlPasssword() + "\" >> mdp");
+			commandes.add("echo \"passwd < mdp \" >> script.sh");
+			commandes.add("echo \"rm mdp\" >> script.sh");
+			
+			commandes.add("docker cp script.sh "+ doc.getNom_docker_serveur() +":/");
+			commandes.add("docker cp mdp "+ doc.getNom_docker_serveur() +":/ ");
+			commandes.add("rm mdp");
+			commandes.add("rm script.sh");
+			commandes.add("docker exec "+ doc.getNom_docker_serveur() +" bash script.sh");
+		}
+		
 		commandes.add("rm -Rvf MariaConf");
 		sshConnex.ExecuterCommande(commandes);
 		commandes.clear();
 		
-		return true;
+		return exit_status;
 	}
 
 	//****** creer dossier et fichier
@@ -71,7 +90,7 @@ public class Deployeur {
 	}
 
 	//***** deployer ficher config
-private Boolean creerInit(String destination,String mdp)
+	private Boolean creerInit(String destination,String mdp)
 	{
 		Fichier init = new Fichier(destination);
 		init.ajouterLigne("CREATE USER 'su_root'@'%' IDENTIFIED BY '"+ mdp +"';\r\n" + 
@@ -96,6 +115,9 @@ private Boolean creerInit(String destination,String mdp)
 	//creation du fichier de deploiement
 	private Boolean CreerDeployer(String destination, BdServeur bdserv)
 	{
+		String ram = "96m";
+		String cpus = "0.2";
+		
 		Fichier deploy = new Fichier(destination);
 		deploy.ajouterLigne("#!/usr/bin/env bash\n" + 
 				"#HARINIAINA RAMIANDRISOA\n");
@@ -107,7 +129,7 @@ private Boolean creerInit(String destination,String mdp)
 							"fi\n");
 		
 		StringBuilder depl = new StringBuilder();
-		depl.append("docker run -d --name "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
+		depl.append("docker run -d --memory="+ram+" --cpus=" + cpus + " --name "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
 		depl.append("-v \\${REPO_DIR}/init:/init ");
 		depl.append("--env-file=env/node"+ bdserv.getDserveur().get(0).getNom_docker_serveur() +".env ");
 		depl.append("--net " + bdserv.getNomBdServeur() + " ");
@@ -118,13 +140,13 @@ private Boolean creerInit(String destination,String mdp)
 						depl.append("--add-host "+bdserv.getDserveur().get(i).getNom_docker_serveur()+":"+bdserv.getDserveur().get(i).getIp_interne().toString()+ " ");
 					}
 		
-		depl.append("-p "+bdserv.getDserveur().get(0).getIp_docker().toString()+":3306:3306 -p 4444 -p 4567 -p 4568 hraenirina1/stage_orange -vif initialize.sql mysqld \n");
+		depl.append("-p "+bdserv.getDserveur().get(0).getIp_docker().toString()+":22:22 -p "+bdserv.getDserveur().get(0).getIp_docker().toString()+":3306:3306 -p 4444 -p 4567 -p 4568 hraenirina1/test_stage -vif initialize.sql mysqld \n");
 		deploy.ajouterLigne(depl.toString());
 		
 		for(int j=1 ;j<bdserv.getDserveur().size();j++)
 		{
 			StringBuilder deplo = new StringBuilder();
-			deplo.append("docker run -d --name " + bdserv.getDserveur().get(j).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
+			deplo.append("docker run -d --memory="+ram+" --cpus=" + cpus + " --name " + bdserv.getDserveur().get(j).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
 			deplo.append("--env-file=env/node"+bdserv.getDserveur().get(j).getNom_docker_serveur() +".env ");
 			deplo.append("--net " +  bdserv.getNomBdServeur() + " ");
 			deplo.append(" --ip "+  bdserv.getDserveur().get(j).getIp_interne().toString() +" ");
@@ -134,7 +156,8 @@ private Boolean creerInit(String destination,String mdp)
 							if(i!=j)		
 								{deplo.append("--add-host "+ bdserv.getDserveur().get(i).getNom_docker_serveur() +":"+bdserv.getDserveur().get(i).getIp_interne().toString() +" ");}
 						}		
-			deplo.append("-p "+bdserv.getDserveur().get(j).getIp_docker().toString()+":3306:3306 -p 4444 -p 4567 -p 4568 hraenirina1/stage_orange -vj mysqld");
+			deplo.append("-p "+bdserv.getDserveur().get(j).getIp_docker().toString()+":22:22 -p "+bdserv.getDserveur().get(j).getIp_docker().toString()+":3306:3306 -p 4444 -p 4567 -p 4568 hraenirina1/test_stage -vj mysqld");
+			
 			deploy.ajouterLigne(deplo.toString());
 		}	
 		

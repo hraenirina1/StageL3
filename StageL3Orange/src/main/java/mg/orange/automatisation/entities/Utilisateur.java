@@ -4,6 +4,8 @@ public class Utilisateur {
 	private String user;
 	private int port;
 	private String adresse;
+	private String password;
+	
 	public String getUser() {
 		return user;
 	}
@@ -22,12 +24,18 @@ public class Utilisateur {
 	public void setAdresse(String adresse) {
 		this.adresse = adresse;
 	}
-	public Utilisateur(String user, int port, String adresse) {
+	public Utilisateur(String user, int port, String adresse, String password) {
 		super();
 		this.user = user;
 		this.port = port;
 		this.adresse = adresse;
+		this.password = password;
 	}
-	
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}	
 	
 }

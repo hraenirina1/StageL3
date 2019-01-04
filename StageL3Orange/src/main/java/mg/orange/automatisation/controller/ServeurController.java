@@ -27,8 +27,7 @@ public class ServeurController {
 	@GetMapping("/serveurAjout")
 	public String ajoutGet(HttpSession session)
 	{
-		if(session.getAttribute("user")==null) return "redirect:/";				
-		return "Ajoutserveur";
+		return "redirect:/";				
 	}
 	@RequestMapping(value="/serveurAjout",method=RequestMethod.POST)
 	public String ajoutPost(HttpSession session,
@@ -38,7 +37,8 @@ public class ServeurController {
 			@RequestParam("ipserveur3")String ip3,
 			@RequestParam("ipserveur4")String ip4,
 			Model model) {
-			//if(session.getAttribute("user")==null) return "redirect:/";	
+		
+		if(session.getAttribute("user")==null) return "redirect:/";	
 		
 		if(!nom.isEmpty() && !ip1.isEmpty() && !ip2.isEmpty() && !ip3.isEmpty() && !ip4.isEmpty())
 		{
