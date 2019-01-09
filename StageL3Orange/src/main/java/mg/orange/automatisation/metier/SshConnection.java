@@ -65,7 +65,6 @@ public class SshConnection {
 					
 					//executer commande
 					((ChannelExec)terminal).setCommand(commande);
-					System.out.println(commande);
 					
 					//ouverture du terminal
 					terminal.connect();
@@ -185,6 +184,65 @@ public class SshConnection {
 	                System.out.println(ee);
 	            }
 	            
+	        }
+			
+		} catch (JSchException | IOException e) {			
+			e.printStackTrace();
+			return null;
+		}				
+	}
+	public String ExecuterCommandeRecupOutStat(String commande) {
+		
+		try {
+			// Creation d'un string qui va etre renvoyer
+			StringBuilder Retour = new StringBuilder();
+			
+			//creation d'un terminal
+			Channel terminal;
+			terminal = session.openChannel("exec");
+			
+			//executer commande
+			((ChannelExec)terminal).setCommand(commande);
+			
+			//ouverture du terminal
+			terminal.connect();
+			
+			//affichage terminal
+			InputStream in = terminal.getInputStream();
+			int j = 0;
+			byte[] tmp = new byte[1024];
+	        while (true) {
+	        	
+	        	// lecture du retour
+	            while (in.available() > 0) {
+	                int i = in.read(tmp, 0, 1024);
+	                if (i < 0)
+	                    break;
+	                Retour.append(new String(tmp, 0, i));	                
+	            }
+	            
+	            if(j!=0)
+	            {
+	            	terminal.disconnect();
+	            }
+	            
+	            
+	            // a la fin
+	            if (terminal.isClosed()) {
+	            	//fermeture du terminal    
+	    			terminal.disconnect();
+	    			//renvoyer le texte
+	                return Retour.toString();
+	            }
+	            
+	            //Attendre
+	            try {
+	                Thread.sleep(1000);
+	            } catch (Exception ee) {
+	                System.out.println(ee);
+	            }
+	            
+	            j++;
 	        }
 			
 		} catch (JSchException | IOException e) {			

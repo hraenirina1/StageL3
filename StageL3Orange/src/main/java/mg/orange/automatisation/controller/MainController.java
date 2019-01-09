@@ -94,12 +94,52 @@ public class MainController {
 		{   
 			
 			
-			if(Superviseur.testMysql(ip))
-			{
-				System.out.println("velona");
+//			if(Superviseur.testMysql(ip))
+//			{
+//				System.out.println("velona");
+//			}
+//			else
+//				System.out.println("maty");
+			
+			try {
+				connectionssh = SshConnection.CreerConnection(new SshConfig("192.168.237.3","root","123456",22));
+
+			//stat	
+				String[] ligne = 
+						connectionssh.ExecuterCommandeRecupOutStat("nc "+ip+" 1234").split("\n");
+				System.out.println(ligne.length);
+				
+				/*
+				 * 1 - ram total
+				 * 2 - ram libre
+				 * 3 - ram utiliser
+				 * 
+				 * 4 - cpu sys
+				 * 5 - cpu ni
+				 * 6 - cpu libre
+				 * 
+				 * 0verlay - 
+				 * */
+				int i = Integer.parseInt(ligne[1]) + Integer.parseInt(ligne[2]);
+					System.out.println("RAM : "+ ligne[1] + "/" + i);
+					
+				Double j = Double.valueOf(ligne[3]) + Double.valueOf(ligne[4]);
+				Double k = j + Double.valueOf(ligne[5]);
+				
+					System.out.println("CPU : "+ j + "/" + k);
+					
+					System.out.println("Disque : " + ligne[7]);
+					
+			//	connectionssh.ExecuterCommandeRecupOut("pkill -fx 'nc "+ip+" 1234'");
+				
+				//sauvegarder
+				
+			} catch (sshException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			else
-				System.out.println("maty");
+			
+			
 			return "redirect:/";
 		}
 	
