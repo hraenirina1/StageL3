@@ -1,4 +1,4 @@
-package mg.orange.automatisation.metier;
+package mg.orange.automatisation.entities;
 
 import java.util.ArrayList;
 import java.util.List;

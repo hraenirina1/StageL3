@@ -1,13 +1,37 @@
     <!-- **********************************************************************************************************************************************************
         MAIN SIDEBAR MENU
         *********************************************************************************************************************************************************** -->
+     
+			
     <!--sidebar start-->
     <aside>
       <div id="sidebar" class="nav-collapse " tabindex="5000" style="overflow: hidden; outline: none; margin-left: 0px;">
-      
-      
         <!-- sidebar menu start-->
         <ul class="sidebar-menu" id="nav-accordion" style="display: none;">
+        
+        <!--  Erreur -->	
+		<div th:if="${Erreur}" class="alert alert-danger fade in" role="alert">
+			      <button type="button" class="close" data-dismiss="alert">
+				      <span aria-hidden="true">
+					      <font style="vertical-align: inherit;">
+					      <font style="vertical-align: inherit;"> X </font>
+					      </font>
+				      </span>
+			      </button>
+			      
+				      <strong>
+				      	<font style="vertical-align: inherit;">
+				      	<font style="vertical-align: inherit;"> Erreur: </font>
+				      	</font>
+				      </strong>
+				      
+			      <font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+			      <span th:utext="${Erreur}"></span>
+				</font>
+				</font>
+			</div>
+			
+			
           <p class="centered"><a href="profile.html"><img src="img/ui-sam.jpg" class="img-circle" width="80"></a></p>
           <h5 class="centered"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:if="${session.user}" th:utext="${session.user.user + '@' + session.user.adresse}"></span></font></font></h5>
 

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import mg.orange.automatisation.entities.Config;
 
-public interface ConfigDao extends JpaRepository<Config, Long> {
+public interface ConfigDAO extends JpaRepository<Config, Long> {
 	public List<Config> findByType(String Type);
 }
 

@@ -1,4 +1,4 @@
-package mg.orange.automatisation.metier;
+package mg.orange.automatisation.dassh;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +59,6 @@ public class SshConnection {
 				//execution des commandes
 				for (String commande : commandes) {
 					
-					
 					//creation d'un terminal
 					Channel terminal = session.openChannel("exec");				
 					
@@ -98,7 +97,7 @@ public class SshConnection {
 				e.printStackTrace();
 			}	
 	}
-	public int ExecuterCommandeVerifRetour(String commande)
+	public int ExecuterCommandeVerifRetour(String commande) throws sshException
 	{
 		
 		try {
@@ -132,8 +131,7 @@ public class SshConnection {
 	        }
 			
 		} catch (JSchException e) {			
-			e.printStackTrace();
-			return 1;
+			throw new sshException(e.getMessage());
 		}				
 		
 		
@@ -267,7 +265,7 @@ public class SshConnection {
 		}		
 		
 	}
-	public int pinger(String adresse) throws Exception
+	public int pinger(String adresse) throws sshException
 	{
 		//creation d'un terminal
 		Channel terminal;
@@ -296,13 +294,10 @@ public class SshConnection {
 	            } catch (Exception ee) {
 	                System.out.println(ee);
 	            }
-	        }
-							
-			
-			
+	        }		
 			
 		} catch (JSchException e) {			
-			throw new Exception("Erreur fatale");
+			throw new sshException("Erreur fatale de ping");
 		}
 		
 	}

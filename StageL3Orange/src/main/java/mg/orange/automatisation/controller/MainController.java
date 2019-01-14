@@ -1,5 +1,6 @@
 package mg.orange.automatisation.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -11,20 +12,32 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import mg.orange.automatisation.dao.BdServeurDAO;
 import mg.orange.automatisation.dao.IPDAO;
+import mg.orange.automatisation.dao.LogDAO;
+import mg.orange.automatisation.dassh.ServeurDASSH;
+import mg.orange.automatisation.dassh.SshConnection;
+import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.IP;
+import mg.orange.automatisation.entities.Log;
 import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.entities.Stat;
 import mg.orange.automatisation.entities.Utilisateur;
+import mg.orange.automatisation.entities.dockerserveur;
+import mg.orange.automatisation.exception.serveurException;
 import mg.orange.automatisation.exception.sshException;
-import mg.orange.automatisation.metier.SshConnection;
 import mg.orange.automatisation.metier.Superviseur;
 
 @Controller
 public class MainController {
-	@SuppressWarnings("unused")
-	private SshConnection connectionssh; 
+
+	//DAO
 	@Autowired
 	private IPDAO ipdao; 
+	@Autowired
+	private BdServeurDAO bdservdao;
+	@Autowired
+	private LogDAO log;	
 	
 	//page de connexion
 	@GetMapping({"/","/index"})
@@ -47,7 +60,7 @@ public class MainController {
 		try {
 			
 			//essai de connexion ssh
-			//connectionssh = SshConnection.CreerConnection(new SshConfig(adr,user,pass,Integer.parseInt(port)));
+			ServeurDASSH.testerServeur(new Utilisateur(user,Integer.parseInt(port), adr,pass));
 			
 			//recuperer l'adresse ip
 			IP ip = IP.IPfromString(adr);
@@ -59,17 +72,19 @@ public class MainController {
 			
 			if(listip.size()==0)
 			{
+				log.save(new Log(user, "Info", "connexion au nouveau serveur "+ adr, false, new Date()));
 				model.addAttribute("ip", ip);
 				return "Ajoutserveur";
 			}
 			else
 			{
+				log.save(new Log(user, "Info", "connexion au serveur "+ adr, false, new Date()));
 				return "home";
 			}
 				
 		}
-		catch(Exception e) {//sshException e){
-			model.addAttribute("Erreur", " Impossible d'établir la connexion avec le serveur " + adr + ":" + port + " !" + e.getMessage());
+		catch(serveurException e){
+			model.addAttribute("Erreur", "Impossible d'établir la connexion avec le serveur " + adr + ":" + port + " !" + e.getMessage());
 			return "index";
 		}		
 	}
@@ -82,6 +97,10 @@ public class MainController {
 	@GetMapping("/deconnexion")	
 	public String Deconnection(HttpSession session)
 	{
+		if(session.getAttribute("user")==null) return "redirect:/";				
+		Utilisateur user = (Utilisateur) session.getAttribute("user");		
+		log.save(new Log(user.getUser(), "Info", "connexion au nouveau serveur "+ user.getAdresse(), false, new Date()));
+		
 		session.invalidate();
 		return "redirect:/";
 	}
@@ -92,63 +111,28 @@ public class MainController {
 				@RequestParam("ip")String ip
 				)
 		{   
-			
-			
-//			if(Superviseur.testMysql(ip))
-//			{
-//				System.out.println("velona");
-//			}
-//			else
-//				System.out.println("maty");
-			
-			try {
-				connectionssh = SshConnection.CreerConnection(new SshConfig("192.168.237.3","root","123456",22));
-
-			//stat	
-				String[] ligne = 
-						connectionssh.ExecuterCommandeRecupOutStat("nc "+ip+" 1234").split("\n");
-				System.out.println(ligne.length);
-				
-				/*
-				 * 1 - ram total
-				 * 2 - ram libre
-				 * 3 - ram utiliser
-				 * 
-				 * 4 - cpu sys
-				 * 5 - cpu ni
-				 * 6 - cpu libre
-				 * 
-				 * 0verlay - 
-				 * */
-				int i = Integer.parseInt(ligne[1]) + Integer.parseInt(ligne[2]);
-					System.out.println("RAM : "+ ligne[1] + "/" + i);
-					
-				Double j = Double.valueOf(ligne[3]) + Double.valueOf(ligne[4]);
-				Double k = j + Double.valueOf(ligne[5]);
-				
-					System.out.println("CPU : "+ j + "/" + k);
-					
-					System.out.println("Disque : " + ligne[7]);
-					
-			//	connectionssh.ExecuterCommandeRecupOut("pkill -fx 'nc "+ip+" 1234'");
-				
-				//sauvegarder
-				
-			} catch (sshException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
 			return "redirect:/";
 		}
 	
+	//supervision
 	@GetMapping("/supervision")	
 	public String supervision(HttpSession session,
-				Model model)
-		{   		
-		
+				Model model) throws sshException
+		{   			
+			List<BdServeur> bdserveur = bdservdao.findByStatus("deploy");	
+			for (BdServeur bdServeur2 : bdserveur) {
+				
+				SshConnection connectionssh = SshConnection.CreerConnection(new SshConfig("192.168.237.3","root","123456",22));
+								
+				bdServeur2.setStat(new Stat(Superviseur.testMysql(bdServeur2.getIp_externe().toString()),"-","-","-"));
+					
+				for (dockerserveur dserv : bdServeur2.getDserveur()) {
+					Stat stat = Superviseur.statistique(dserv.getIp_docker().toString(), connectionssh);
+					dserv.setStat(new Stat(Superviseur.testMysql(dserv.getIp_docker().toString()),stat.getRAM(),stat.getDisque(),stat.getCPU()));
+				}
+			}
 			
+			model.addAttribute("bdserv",bdserveur);
 			return "supervision";
 		}
 

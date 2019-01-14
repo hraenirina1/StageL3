@@ -11,17 +11,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import mg.orange.automatisation.dao.BdServeurDAO;
-import mg.orange.automatisation.dao.ConfigDao;
+import mg.orange.automatisation.dao.ConfigDAO;
 import mg.orange.automatisation.dao.DockerServeurDAO;
 import mg.orange.automatisation.dao.IPDAO;
+import mg.orange.automatisation.dassh.DockerDASSH;
 import mg.orange.automatisation.entities.BdServeur;
-import mg.orange.automatisation.entities.SshConfig;
 import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.entities.dockerConfig;
 import mg.orange.automatisation.entities.dockerserveur;
-import mg.orange.automatisation.metier.Configurateur;
-import mg.orange.automatisation.metier.Deployeur;
-import mg.orange.automatisation.metier.SshConnection;
+import mg.orange.automatisation.exception.ConfigException;
+import mg.orange.automatisation.exception.serveurException;
 
 @Controller
 public class DockerServeurController {
@@ -30,32 +29,41 @@ public class DockerServeurController {
 	@Autowired 
 	private DockerServeurDAO dockerserv; 
 	@Autowired
-	private ConfigDao config;
+	private ConfigDAO config;
 	@Autowired
 	private IPDAO ip;
+	
 	@RequestMapping("/dockerServeurAjout")
 	public String dockerServeurAjout(HttpSession session,
 	@RequestParam("bdServ") String id_bdserveur,
 	@RequestParam("nbServ") String nb_DockerServeur,
-			Model model) throws NumberFormatException, Exception
+			Model model) 
 	{
 		if(session.getAttribute("user")==null) return "redirect:/";		
-			
+			Utilisateur user = (Utilisateur) session.getAttribute("user");
+		
 		//recuperer la base de donnees
 		BdServeur bd = bdserv.findById(Long.valueOf(id_bdserveur)).get();
 		
 		//configurer les serveurs dockers
-		Utilisateur user = (Utilisateur) session.getAttribute("user");
-		Configurateur configurateur = new Configurateur(new SshConfig(user));
-		List<dockerserveur> dockers = configurateur.configurer(bd, Integer.parseInt(nb_DockerServeur), config.findByType("Base"),ip);
 		
-		for (dockerserveur dockerserveur : dockers) {
-			dockerserv.save(dockerserveur);
-		}
+		List<dockerserveur> dockers;
+		
+		try {
+				//configuration docker
+				dockers = DockerDASSH.configurer(user, bd.getServeur(), bd, Integer.parseInt(nb_DockerServeur), config.findByType("Base"),ip.findAll());
+				
+				//enregistrement docker
+				for (dockerserveur dockerserveur : dockers) {
+					dockerserv.save(dockerserveur);
+				}
+			
+		} catch (NumberFormatException | serveurException | ConfigException e) {			
+			model.addAttribute("Erreur", e.getMessage());
+		}		
 		
 		return "redirect:/bdServeurConfig?bdserv=" + id_bdserveur;
 	}
-	
 	@RequestMapping("/dockerServeurConfig")
 	public String dockerServeurConfig(HttpSession session,
 	@RequestParam("dockerServ") String id_dockerServeur,

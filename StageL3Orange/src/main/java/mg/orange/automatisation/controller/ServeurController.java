@@ -1,5 +1,6 @@
 package mg.orange.automatisation.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import mg.orange.automatisation.dao.IPDAO;
+import mg.orange.automatisation.dao.LogDAO;
 import mg.orange.automatisation.dao.ServeurDAO;
 import mg.orange.automatisation.entities.IP;
+import mg.orange.automatisation.entities.Log;
 import mg.orange.automatisation.entities.Serveur;
+import mg.orange.automatisation.entities.Utilisateur;
 
 @Controller
 public class ServeurController {
@@ -23,6 +27,8 @@ public class ServeurController {
 	private ServeurDAO serveur;
 	@Autowired
 	private IPDAO ip;
+	@Autowired
+	private LogDAO log;
 	
 	@GetMapping("/serveurAjout")
 	public String ajoutGet(HttpSession session)
@@ -40,6 +46,8 @@ public class ServeurController {
 		
 		if(session.getAttribute("user")==null) return "redirect:/";	
 		
+		Utilisateur user = (Utilisateur) session.getAttribute("user");
+		
 		if(!nom.isEmpty() && !ip1.isEmpty() && !ip2.isEmpty() && !ip3.isEmpty() && !ip4.isEmpty())
 		{
 			if((Integer.parseInt(ip1)>=0 && Integer.parseInt(ip1)<=255)
@@ -50,8 +58,9 @@ public class ServeurController {
 				IP ip_serveur = new IP(Integer.parseInt(ip1),Integer.parseInt(ip2), Integer.parseInt(ip3), Integer.parseInt(ip4));
 				
 				ip.save(ip_serveur);
-				serveur.save(new Serveur(nom, ip_serveur));
-				
+				serveur.save(new Serveur(nom, ip_serveur));							
+				log.save(new Log(user.getUser(),"info","Ajout d'un nouveau serveur" + user.getAdresse(),false,new Date()));
+						
 				return "redirect:serveurList";
 			}
 		}
@@ -63,6 +72,7 @@ public class ServeurController {
 	public String list(HttpSession session,Model model) {
 		
 		if(session.getAttribute("user")==null) return "redirect:/";
+		
 		List<Serveur> listserveur = serveur.findAll();
 		model.addAttribute("listServeur", listserveur);	
 		

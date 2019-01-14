@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 @Entity
 public class BdServeur {
@@ -129,6 +130,15 @@ public class BdServeur {
 		this.reseau = reseau;
 	}
 	
+	//stat
+	@Transient
+	private Stat stat;	
+	public Stat getStat() {
+		return stat;
+	}
+	public void setStat(Stat stat) {
+		this.stat = stat;
+	}
 	
 	//contructeur
 	public BdServeur() {
