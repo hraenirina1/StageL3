@@ -43,6 +43,10 @@ public class dockerserveur {
 	@JoinColumn(name="id_bd_serveur",nullable=false)
 	private BdServeur bdserveur;
 	
+	private String ram;
+	private String cpu;
+	private String espace;
+	
 	//stat
 	@Transient
 	private Stat stat;	
@@ -52,8 +56,25 @@ public class dockerserveur {
 	public void setStat(Stat stat) {
 		this.stat = stat;
 	}
-		
-		
+	
+	public String getRam() {
+		return ram;
+	}
+	public void setRam(String ram) {
+		this.ram = ram;
+	}
+	public String getCpu() {
+		return cpu;
+	}
+	public void setCpu(String cpu) {
+		this.cpu = cpu;
+	}
+	public String getEspace() {
+		return espace;
+	}
+	public void setEspace(String espace) {
+		this.espace = espace;
+	}
 	public dockerserveur() {
 		// TODO Auto-generated constructor stub
 	}

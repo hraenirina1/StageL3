@@ -22,21 +22,17 @@ import mg.orange.automatisation.dao.ServeurDAO;
 import mg.orange.automatisation.dassh.BdServeurDASSH;
 import mg.orange.automatisation.dassh.ReseauDASSH;
 import mg.orange.automatisation.dassh.ServeurDASSH;
-import mg.orange.automatisation.dassh.SshConnection;
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.Config;
 import mg.orange.automatisation.entities.IP;
 import mg.orange.automatisation.entities.Log;
 import mg.orange.automatisation.entities.Reseau;
 import mg.orange.automatisation.entities.Serveur;
-import mg.orange.automatisation.entities.SshConfig;
 import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.entities.dockerConfig;
 import mg.orange.automatisation.entities.dockerserveur;
 import mg.orange.automatisation.exception.reseauException;
 import mg.orange.automatisation.exception.serveurException;
-import mg.orange.automatisation.exception.sshException;
-import mg.orange.automatisation.metier.Deployeur;
 
 @Controller
 public class BdServeurController {
@@ -80,7 +76,7 @@ public class BdServeurController {
 			List<BdServeur> bdserveur = bdserv.findAll();		
 			model.addAttribute("BdServeurList", bdserveur);
 		}
-		
+		model.addAttribute("page", "listBdServeur");
 		return "bdServeurList";
 	}
 	@GetMapping("/bdServeurDeployer")
@@ -89,6 +85,9 @@ public class BdServeurController {
 			Model model)
 	{
 		if(session.getAttribute("user")==null) return "redirect:/";
+		if(session.getAttribute("Erreur")!=null) model.addAttribute("Erreur", (String) session.getAttribute("Erreur"));
+		
+		session.removeAttribute("Erreur");
 		
 		if(id_serveur!=null && !id_serveur.isEmpty())
 		{
@@ -110,6 +109,9 @@ public class BdServeurController {
 			Model model)
 	{
 		if(session.getAttribute("user")==null) return "redirect:/";
+		if(session.getAttribute("Erreur")!=null) model.addAttribute("Erreur", (String) session.getAttribute("Erreur"));
+		
+		session.removeAttribute("Erreur");
 		
 		if(id_serveur!=null && !id_serveur.isEmpty())
 		{
@@ -130,8 +132,8 @@ public class BdServeurController {
 	{
 		if(session.getAttribute("user")==null) return "redirect:/";
 		
-		model.addAttribute("reseau", reseau.findAll());
-		model.addAttribute("serveur", serv.findAll());
+			model.addAttribute("reseau", reseau.findAll());
+			model.addAttribute("serveur", serv.findAll());
 		
 		return "AjoutBdServeur";
 	}

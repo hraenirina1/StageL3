@@ -28,6 +28,25 @@ public class ServeurDASSH {
 		}
 	}
 	
+	public static String[] listeSauvegarde( Utilisateur user, Serveur serv) throws serveurException
+	{
+		try {
+				String[] list;
+				
+				//connnexion
+				SshConnection sshCon = SshConnection.CreerConnection(new SshConfig(user));		
+				
+				//list sauvegarde
+				String save = sshCon.ExecuterCommandeRecupOut("cd /srv/backup/mariadb/ && ls");				
+				list = save.split("\n");
+				return list;
+					
+		} catch (sshException e) {
+				throw new serveurException(e.getMessage());
+		}
+		
+	}
+	
 	public static void miseEnPlaceIp(IP ip, String interface_serveur, Utilisateur user, Serveur serv) throws serveurException
 	{
 		try {
@@ -58,6 +77,45 @@ public class ServeurDASSH {
 				throw new serveurException(e.getMessage());
 		}
 		
+	}
+	
+	public static void testerDocker(Utilisateur user) throws serveurException
+	{ 
+		try {
+				SshConnection sshConnex = SshConnection.CreerConnection(new SshConfig(user));	
+				if(sshConnex.ExecuterCommandeVerifRetour("docker")!=0)
+				{
+					throw new serveurException("Le serveur n'a pas de docker");
+				}
+		} catch (sshException e) {
+				throw new serveurException(e.getMessage());
+		}
+	}
+	
+	public static void testSshConnexion(Utilisateur user) throws serveurException
+	{ 
+		try {
+				SshConnection sshConnex = SshConnection.CreerConnection(new SshConfig(user));	
+				if(sshConnex.ExecuterCommandeVerifRetour("netstat -paunt | grep LISTEN | grep 0.0.0.0:22")!=1)
+				{
+					throw new serveurException("Le serveur possede une multi - ecoute ssh");
+				}
+		} catch (sshException e) {
+				throw new serveurException(e.getMessage());
+		}
+	}
+	
+	public static void testMysqlConnexion(Utilisateur user) throws serveurException
+	{ 
+		try {
+				SshConnection sshConnex = SshConnection.CreerConnection(new SshConfig(user));	
+				if(sshConnex.ExecuterCommandeVerifRetour("netstat -paunt | grep LISTEN | grep 0.0.0.0:3306")!=1)
+				{
+					throw new serveurException("Le serveur possede une multi - ecoute Mariadb");
+				}
+		} catch (sshException e) {
+				throw new serveurException(e.getMessage());
+		}
 	}
 	
 }

@@ -22,7 +22,6 @@ public class BdServeurDASSH {
 		try {
 				SshConnection.CreerConnection(new SshConfig(user));	
 				
-				
 		} catch (sshException e) {
 				throw new serveurException(e.getMessage());
 		}
@@ -50,7 +49,6 @@ public class BdServeurDASSH {
 		
 				commandes.add("echo \""+ fich.toString() +"\" > " + fich.getNomFichier() + ";");
 				sshConnex.ExecuterCommande(commandes);
-		
 		} catch (sshException e) {
 				throw new serveurException(e.getMessage());
 		}
@@ -106,8 +104,6 @@ public class BdServeurDASSH {
 	////creation du fichier de deploiement
 	private static void CreerDeployer(String destination, BdServeur bdserv, Utilisateur user) throws serveurException
 	{
-		String ram = "96m";
-		String cpus = "0.2";
 		
 		Fichier deploy = new Fichier(destination);
 		deploy.ajouterLigne("#!/usr/bin/env bash\n" + 
@@ -115,12 +111,10 @@ public class BdServeurDASSH {
 		
 		deploy.ajouterLigne("REPO_DIR=\\$(pwd)\n");
 		deploy.ajouterLigne("GALERANET=\\$(docker network inspect "+ bdserv.getNomBdServeur() + ")\n");
-		deploy.ajouterLigne("if [[ \"\\${GALERANET}\" = '[]' ]]; then\n" + 
-							"    docker network create -d overlay --attachable --subnet="+bdserv.getAdresseReseau().toString() +"/" + String.valueOf(bdserv.getMasque()) + " "+ bdserv.getNomBdServeur() +"\n" + 
-							"fi\n");
+		deploy.ajouterLigne("if [[ \"\\${GALERANET}\" != '[]' ]]; then \n");
 		
 		StringBuilder depl = new StringBuilder();
-		depl.append("docker run -d --memory="+ram+" --cpus=" + cpus + " --name "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
+		depl.append("docker run -d --memory="+bdserv.getDserveur().get(0).getRam()+"m --cpus=" + bdserv.getDserveur().get(0).getCpu() + " --name "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
 		depl.append("-v \\${REPO_DIR}/init:/init ");
 		depl.append("--env-file=env/node"+ bdserv.getDserveur().get(0).getNom_docker_serveur() +".env ");
 		depl.append("--net " + bdserv.getNomBdServeur() + " ");
@@ -137,7 +131,7 @@ public class BdServeurDASSH {
 		for(int j=1 ;j<bdserv.getDserveur().size();j++)
 		{
 			StringBuilder deplo = new StringBuilder();
-			deplo.append("docker run -d --memory="+ram+" --cpus=" + cpus + " --name " + bdserv.getDserveur().get(j).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
+			deplo.append("docker run -d --memory="+ bdserv.getDserveur().get(j).getRam()+"m --cpus=" + bdserv.getDserveur().get(j).getCpu() + " --name " + bdserv.getDserveur().get(j).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
 			deplo.append("--env-file=env/node"+bdserv.getDserveur().get(j).getNom_docker_serveur() +".env ");
 			deplo.append("--net " +  bdserv.getNomBdServeur() + " ");
 			deplo.append(" --ip "+  bdserv.getDserveur().get(j).getIp_interne().toString() +" ");
@@ -151,10 +145,123 @@ public class BdServeurDASSH {
 			
 			deploy.ajouterLigne(deplo.toString());
 		}	
-		
-		
-		deploy.ajouterLigne("exit 0;");		
+		deploy.ajouterLigne("exit 0;");
+		deploy.ajouterLigne("fi");
+		deploy.ajouterLigne("exit 1;");		
 		creerFichier(deploy,user);
+	}
+	
+	////sauvegarde
+	public static void sauvegarde(BdServeur bdServeur, String Script_destination,String script,Utilisateur user) throws serveurException
+	{
+		
+		String[] doc = Script_destination.split("/");
+		if(doc.length>=2)
+		{
+			String dos = "";
+			for (String string : doc) {
+				dos += string + "/";
+				creerDossier(dos, user);
+			}
+			
+		}	
+		
+		Fichier save = new Fichier(Script_destination+script);
+		save.ajouterLigne("set -e");
+		save.ajouterLigne("set -u");
+		save.ajouterLigne("IPSERV=\\$1");
+		save.ajouterLigne("USER_MYSQL=\\$2");
+		save.ajouterLigne("PASS_MYSQL=\\$3");
+		save.ajouterLigne("BACKUP_DIR=/srv/backup/mariadb");
+		save.ajouterLigne("RETENTION=7");
+		save.ajouterLigne("DB_EXCLUDE=\"information_schema mysql performance_schema\"");
+		save.ajouterLigne("FOLDER_PER_HOST=0");
+		save.ajouterLigne("FOLDER_PER_BASE=0");
+		save.ajouterLigne("MY_OPTS=\"--opt --complete-insert --routines --single-transaction --max_allowed_packet=32M\"");
+		save.ajouterLigne("DATE=\\`date +%Y%m%d-%H%M\\`");
+		save.ajouterLigne("PREFIX=\\${IPSERV}_mysql_backup");
+		save.ajouterLigne("PROGNAME=mysql-backup");
+		save.ajouterLigne("LOCKFILE=/var/tmp/\\${PROGNAME}.lock");
+		save.ajouterLigne("MYSQL=\"mysql -h \\${IPSERV} -u \\${USER_MYSQL} -p\\${PASS_MYSQL}\"");
+		save.ajouterLigne("MYSQLDUMP=\"mysqldump -h \\${IPSERV} -u \\${USER_MYSQL} -p\\${PASS_MYSQL}\"");
+		save.ajouterLigne("function log() {");
+		save.ajouterLigne("loglevel=\\$1");
+		save.ajouterLigne("shift");
+		save.ajouterLigne("msg=\"\\$*\"");
+		save.ajouterLigne("logger -p user.\\${loglevel} -t \"\\${PROGNAME}[\\$\\$]\" \\${msg}");
+		save.ajouterLigne("}");
+		save.ajouterLigne("function clean_backups() {");
+		save.ajouterLigne("local dir=\\$1 prefix=\\$2 retention=\\$3");
+		save.ajouterLigne("find \"\\${dir}\" -name .snapshot -prune -o -type f -name \"\\${prefix}*\" -print0 | while read -d \\$'\\0' file ; do");
+		save.ajouterLigne("file_date=\\$(echo \\${file} | sed -e 's/^.*\\.\\([0-9]\\{8\\}\\)-\\([0-9]\\{4\\}\\).*\\$/\\1\\2/')");
+		save.ajouterLigne("touch -t \\${file_date} \\${file}");
+		save.ajouterLigne("done");
+		save.ajouterLigne("find \"\\${dir}\" -type f -name \"\\${prefix}*\" -mtime +\\${retention} -exec rm -f \"{}\" \\; 2>/dev/null");
+		save.ajouterLigne("}");
+		save.ajouterLigne("function main() {");
+		save.ajouterLigne("log info \"Début de la sauvegarde MySQL\"");
+		save.ajouterLigne("databases=\\`\\${MYSQL} -Bse \"show databases\"\\`");
+		save.ajouterLigne("if [ \\$? -ne 0 ]; then");
+		save.ajouterLigne("log error \"ERREUR d'accès au serveur MySQL. La requête 'show databases' a échoué.\"");
+		save.ajouterLigne("exit 1");
+		save.ajouterLigne("fi");
+		save.ajouterLigne("if [ -n \"\\${DB_EXCLUDE}\" ]; then");
+		save.ajouterLigne("reg=\\$(echo \\${DB_EXCLUDE} | sed -e 's/ /\\\\\\\\|/')");
+		save.ajouterLigne("reg=\"\\(\\${reg}\\)\"");
+		save.ajouterLigne("databases=\\$(echo \\${databases} | sed -e \"s/\\${reg}//g\")");
+		save.ajouterLigne("fi");
+		save.ajouterLigne("for base in \\${databases}");
+		save.ajouterLigne("do");
+		save.ajouterLigne("DUMP_DIR=\\${BACKUP_DIR}");
+		save.ajouterLigne("if [ \\${FOLDER_PER_HOST} -eq 1 ]; then");
+		save.ajouterLigne("DUMP_DIR=\\${DUMP_DIR}/\\${HOSTNAME%%.*}");
+		save.ajouterLigne("fi");
+		save.ajouterLigne("if [ \\${FOLDER_PER_BASE} -eq 1 ]; then");
+		save.ajouterLigne("DUMP_DIR=\\${DUMP_DIR}/\\${base}");
+		save.ajouterLigne("fi");
+		save.ajouterLigne("mkdir -p \\${DUMP_DIR}");
+		save.ajouterLigne("log info \"Dump de la base \\${base}...\"");
+		save.ajouterLigne("\\${MYSQLDUMP} \\${MY_OPTS} \\${base} \\");
+		save.ajouterLigne("| bzip2 -9 > \\${DUMP_DIR}/\\${PREFIX}_\\${base}.\\${DATE}.sql.bz2");
+		save.ajouterLigne("if [ \\$? -ne 0 ]; then");
+		save.ajouterLigne("log error \"ERREUR lors du dump de la base \\${base}.\"");
+		save.ajouterLigne("fi");
+		save.ajouterLigne("done");
+		save.ajouterLigne("clean_backups \\${BACKUP_DIR} \\${PREFIX} \\${RETENTION}");
+		save.ajouterLigne("log info \"Fin de la sauvegarde MySQL\"");
+		save.ajouterLigne("}");
+		save.ajouterLigne("if ( set -o noclobber; echo \"\\$\\$\" > \"\\$LOCKFILE\") 2> /dev/null;");
+		save.ajouterLigne("then");
+		save.ajouterLigne("trap 'rm -f \"\\$LOCKFILE\"; exit \\$?' INT TERM EXIT");
+		save.ajouterLigne("main");
+		save.ajouterLigne("rm -f \"\\$LOCKFILE\"");
+		save.ajouterLigne("trap - INT TERM EXIT");
+		save.ajouterLigne("exit 0");
+		save.ajouterLigne("else");
+		save.ajouterLigne("(");
+		save.ajouterLigne("echo \"Failed to acquire lockfile: \\$LOCKFILE.\"");
+		save.ajouterLigne("echo \"Held by following process:\"");
+		save.ajouterLigne("ps -p \\$(cat \\$LOCKFILE) uww");
+		save.ajouterLigne(") | log error");
+		save.ajouterLigne("exit 1");
+		save.ajouterLigne("fi");
+		
+		creerFichier(save,user);
+		
+		sauvegarderdocker(bdServeur, Script_destination,script, user);
+	}
+	
+	////sauvegarde docker 
+	private static void sauvegarderdocker(BdServeur bdServeur, String Script_destination, String script,Utilisateur user) throws serveurException
+	{
+		try {
+			SshConnection sshConnex = SshConnection.CreerConnection(new SshConfig(user));	
+				for ( dockerserveur dserv : bdServeur.getDserveur()) {
+					sshConnex.ExecuterCommandeVerifRetour("(crontab -l; echo \"* * * * * bash "+ Script_destination+script +" "+ dserv.getIp_docker() +" su_root "+ bdServeur.getMysqlPasssword() + " \") | crontab -");
+				}			
+		} catch (sshException e) {
+				throw new serveurException(e.getMessage());
+		}
 	}
 	
 	public static void ReelDeployer(BdServeur bdServeur,Utilisateur user, Serveur serv) throws serveurException
@@ -176,10 +283,9 @@ public class BdServeurDASSH {
 		for(dockerserveur doc: bdServeur.getDserveur())
 		{
 			DockerDASSH.configurerDocker(doc, bdServeur.getMysqlPasssword(), user);			
-		}	
+		}
 		
-		//CreerSauvegarde("script-mysql.sh", bdServeur);
+		supprimerConf(user);
+		sauvegarde(bdServeur,"/srv/mariadb/backup/",bdServeur.getNomBdServeur()+".sh", user);		
 	}
-
-	
 }

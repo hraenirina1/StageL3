@@ -37,30 +37,32 @@ public class DockerServeurController {
 	public String dockerServeurAjout(HttpSession session,
 	@RequestParam("bdServ") String id_bdserveur,
 	@RequestParam("nbServ") String nb_DockerServeur,
+	@RequestParam("ram") String ram,
+	@RequestParam("cpu") String cpu,
 			Model model) 
 	{
 		if(session.getAttribute("user")==null) return "redirect:/";		
 			Utilisateur user = (Utilisateur) session.getAttribute("user");
 		
-		//recuperer la base de donnees
-		BdServeur bd = bdserv.findById(Long.valueOf(id_bdserveur)).get();
+			//recuperer la base de donnees
+			BdServeur bd = bdserv.findById(Long.valueOf(id_bdserveur)).get();
 		
-		//configurer les serveurs dockers
+			//configurer les serveurs dockers		
+			List<dockerserveur> dockers;
 		
-		List<dockerserveur> dockers;
-		
-		try {
-				//configuration docker
-				dockers = DockerDASSH.configurer(user, bd.getServeur(), bd, Integer.parseInt(nb_DockerServeur), config.findByType("Base"),ip.findAll());
+			try {
+					//configuration docker
+					dockers = DockerDASSH.configurer(user, bd.getServeur(), bd, Integer.parseInt(nb_DockerServeur),ram,cpu,config.findByType("Base"),ip.findAll());
+					
+					//enregistrement docker
+					for (dockerserveur dockerserveur : dockers) {
+						dockerserv.save(dockerserveur);
+					}
 				
-				//enregistrement docker
-				for (dockerserveur dockerserveur : dockers) {
-					dockerserv.save(dockerserveur);
-				}
-			
-		} catch (NumberFormatException | serveurException | ConfigException e) {			
-			model.addAttribute("Erreur", e.getMessage());
-		}		
+			} catch (NumberFormatException | serveurException | ConfigException e) {			
+				model.addAttribute("Erreur", e.getMessage());
+				System.out.print(e.getMessage());
+			}		
 		
 		return "redirect:/bdServeurConfig?bdserv=" + id_bdserveur;
 	}

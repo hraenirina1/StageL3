@@ -37,7 +37,7 @@
 
           <!-- serveur -->
           <li class="sub-menu dcjq-parent-li">
-            <a href="/serveurList" class="dcjq-parent ">
+            <a href="/serveurList" th:class="${page=='listServeur'} ? 'dcjq-parent active' : 'dcjq-parent'">
               <i class="fa fa-desktop"></i>
               <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Serveur </font></font></span>
               <span class="dcjq-icon"></span>
@@ -55,17 +55,17 @@
           
           <!-- BD serveur -->
           <li class="sub-menu dcjq-parent-li">
-            <a href="javascript:;" class="dcjq-parent">
+            <a href="javascript:;" th:class="${page=='listBdServeur' || page=='listBdServ' } ? 'dcjq-parent active' : 'dcjq-parent'">
               <i class="fa fa-desktop"></i>
               <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Serveur de Base de donnee</font></font></span>
               <span class="dcjq-icon"></span>
              </a>
              
             <ul class="sub" style="display: none;">
-            	<li><a href="/bdServeurList"> Liste </a></li>
-              <li><a href="/bdServeurAjout"> Ajouter </a></li>
-              <li><a href="/bdServeurDeployer"> Deployer </a></li>
-              <li><a href="/bdServeurEncours"> Travailler </a></li>
+            	<li th:class="${page=='listBdServeur' || page=='listBdServ' } ? 'active' : ''"><a href="/bdServeurList"> Liste </a></li>
+              	<li><a href="/bdServeurAjout"> Ajouter </a></li>
+              	<li><a href="/bdServeurDeployer"> Deployer </a></li>
+              	<li><a href="/bdServeurEncours"> Travailler </a></li>
             </ul>            
           </li>
 		

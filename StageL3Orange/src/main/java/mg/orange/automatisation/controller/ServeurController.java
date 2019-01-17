@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import mg.orange.automatisation.dao.IPDAO;
 import mg.orange.automatisation.dao.LogDAO;
 import mg.orange.automatisation.dao.ServeurDAO;
+import mg.orange.automatisation.dassh.ServeurDASSH;
 import mg.orange.automatisation.entities.IP;
 import mg.orange.automatisation.entities.Log;
 import mg.orange.automatisation.entities.Serveur;
 import mg.orange.automatisation.entities.Utilisateur;
+import mg.orange.automatisation.exception.serveurException;
 
 @Controller
 public class ServeurController {
@@ -44,8 +46,7 @@ public class ServeurController {
 			@RequestParam("ipserveur4")String ip4,
 			Model model) {
 		
-		if(session.getAttribute("user")==null) return "redirect:/";	
-		
+		if(session.getAttribute("user")==null) return "redirect:/";			
 		Utilisateur user = (Utilisateur) session.getAttribute("user");
 		
 		if(!nom.isEmpty() && !ip1.isEmpty() && !ip2.isEmpty() && !ip3.isEmpty() && !ip4.isEmpty())
@@ -56,16 +57,24 @@ public class ServeurController {
 				&&(Integer.parseInt(ip4)>=0 && Integer.parseInt(ip4)<=255)){
 				
 				IP ip_serveur = new IP(Integer.parseInt(ip1),Integer.parseInt(ip2), Integer.parseInt(ip3), Integer.parseInt(ip4));
-				
-				ip.save(ip_serveur);
-				serveur.save(new Serveur(nom, ip_serveur));							
-				log.save(new Log(user.getUser(),"info","Ajout d'un nouveau serveur" + user.getAdresse(),false,new Date()));
+				try {
+						ServeurDASSH.testerDocker(user);
+						ServeurDASSH.testSshConnexion(user);
+						ServeurDASSH.testMysqlConnexion(user);
 						
-				return "redirect:serveurList";
+						ip.save(ip_serveur);
+						serveur.save(new Serveur(nom, ip_serveur));							
+						log.save(new Log(user.getUser(),"info","Ajout d'un nouveau serveur" + user.getAdresse(),false,new Date()));
+						
+						return "redirect:serveurList";					
+				} catch (serveurException e) {
+					session.removeAttribute("user");
+					session.setAttribute("Erreur", e.getMessage());
+				}
 			}
 		}
 		
-		return "Ajoutserveur";
+		return "redirect:/";
 	}
 	
 	@GetMapping("/serveurList")
@@ -75,7 +84,7 @@ public class ServeurController {
 		
 		List<Serveur> listserveur = serveur.findAll();
 		model.addAttribute("listServeur", listserveur);	
-		
+		model.addAttribute("page", "listServeur");
 		return "listServeur";
 	}
 	

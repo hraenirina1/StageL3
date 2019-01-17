@@ -33,7 +33,7 @@
            <h4><i class="fa fa-angle-right"></i> Liste des contaigners dockers </h4>
            <div class="form-panel">
               
-              <div class="form">
+              <div th:if="${ListDockerServeur.size()==0}" class="form">
                 <form class="cmxform form-horizontal style-form" id="signupForm" method="post" action="/dockerServeurAjout">
                 
                   <div class="form-group col-lg-12">
@@ -42,10 +42,23 @@
                       <input class=" form-control" id="nomserveur" name="nbServ" type="number" required/>
                       <input class=" form-control" id="nomserveur" name="bdServ" type="hidden" th:attr="value=${bdserv}" required/>
                     </div>
+                    
+                    <label for="nomserveur" class="control-label col-lg-6"> RAM ( en Mo ) </label>
+                    <div class="col-lg-2">
+                      <input class=" form-control" id="nomserveur" name="ram" type="number" required/>
+                    </div>
+                    
+                    <label for="nomserveur" class="control-label col-lg-6"> CPU ( en nb de coeur )</label>
+                    <div class="col-lg-2">
+                      <input class=" form-control" id="nomserveur" name="cpu" type="number" step="any" required/>
+                    </div>
+                    
                     <div class="col-lg-4">
                       <button class="btn btn-theme col-lg-12" type="submit"> Ajouter </button>                      
                     </div>
                   </div>
+                  
+                  
                 </form>
               </div>
 
@@ -90,15 +103,10 @@
             </div>
             <!-- /form-panel -->
           </div>
-          <!-- /col-lg-12 -->
-        </div>
-           
-           
+          <!-- /col-lg-12 -->           
                       
            <!-- **********************************************************************************************************************************************************
            *********************************************************************************************************************************************************** -->
-          </div>
-        </div>
       </section>
       <!-- /wrapper -->
     </section>

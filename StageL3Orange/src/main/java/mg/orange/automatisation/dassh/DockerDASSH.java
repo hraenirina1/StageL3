@@ -8,6 +8,7 @@ import mg.orange.automatisation.entities.Config;
 import mg.orange.automatisation.entities.IP;
 import mg.orange.automatisation.entities.Serveur;
 import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.entities.Stat;
 import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.entities.dockerConfig;
 import mg.orange.automatisation.entities.dockerserveur;
@@ -21,7 +22,7 @@ public class DockerDASSH {
 	
 	}
 	
-	public static List<dockerserveur> configurer(Utilisateur user, Serveur serv, BdServeur bd,int nb_docker,List<Config> configBase,List<IP> ip_dao) throws serveurException, ConfigException
+	public static List<dockerserveur> configurer(Utilisateur user, Serveur serv, BdServeur bd,int nb_docker,String ram, String cpu, List<Config> configBase,List<IP> ip_dao) throws serveurException, ConfigException
 	{
 		List<dockerserveur> dockers = new ArrayList<>();
 		
@@ -44,6 +45,10 @@ public class DockerDASSH {
 					
 					//creation du docker
 					dockerserveur docker = new dockerserveur(bd.getNomBdServeur() + "-galera-" + i,ip,bd);
+					
+					//ressource docker 
+					docker.setRam(ram);
+					docker.setCpu(cpu);
 					
 					//assignement du ip interne
 					docker.setIp_interne(adresseIpInterne.get(i-1));
@@ -176,5 +181,41 @@ public class DockerDASSH {
 			throw new serveurException(e.getMessage());
 	}
 }
-
+	public static Stat statistique(String ip, Utilisateur user) throws serveurException
+	{
+		try {
+				SshConnection connectionssh = SshConnection.CreerConnection(new SshConfig(user));
+				
+				Stat stat = new Stat();
+				//stat	
+					String[] ligne = 
+							connectionssh.ExecuterCommandeRecupOutStat("nc "+ip+" 1234").split("\n");
+					System.out.println(ligne.toString());
+					/*
+					 * 1 - ram total
+					 * 2 - ram libre
+					 * 3 - ram utiliser
+					 * 
+					 * 4 - cpu sys
+					 * 5 - cpu ni
+					 * 6 - cpu libre
+					 * 
+					 * 0verlay - 
+					 * */
+					//int i = Integer.parseInt(ligne[1]) + Integer.parseInt(ligne[2]);
+					stat.setRAM(""+ ligne[1] +"");	
+					
+					Double j = Double.valueOf(ligne[3]) + Double.valueOf(ligne[4]);
+					//Double k = j + Double.valueOf(ligne[5]);
+					
+					stat.setCPU(""+ j +"");
+					stat.setDisque(ligne[7]);
+						
+					connectionssh.ExecuterCommandeRecupOut("pkill -fx 'nc "+ip+" 1234'");
+					
+					return stat;
+			} catch (sshException e) {
+					throw new serveurException(e.getMessage());
+			}
+	}
 }

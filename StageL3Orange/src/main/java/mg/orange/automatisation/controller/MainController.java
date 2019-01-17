@@ -1,5 +1,6 @@
 package mg.orange.automatisation.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,12 +16,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import mg.orange.automatisation.dao.BdServeurDAO;
 import mg.orange.automatisation.dao.IPDAO;
 import mg.orange.automatisation.dao.LogDAO;
+import mg.orange.automatisation.dao.ServeurDAO;
+import mg.orange.automatisation.dassh.BdServeurDASSH;
+import mg.orange.automatisation.dassh.DockerDASSH;
 import mg.orange.automatisation.dassh.ServeurDASSH;
-import mg.orange.automatisation.dassh.SshConnection;
 import mg.orange.automatisation.entities.BdServeur;
 import mg.orange.automatisation.entities.IP;
 import mg.orange.automatisation.entities.Log;
-import mg.orange.automatisation.entities.SshConfig;
+import mg.orange.automatisation.entities.Sauvegarde;
+import mg.orange.automatisation.entities.Serveur;
 import mg.orange.automatisation.entities.Stat;
 import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.entities.dockerserveur;
@@ -37,16 +41,22 @@ public class MainController {
 	@Autowired
 	private BdServeurDAO bdservdao;
 	@Autowired
+	private ServeurDAO servdao;
+	@Autowired
 	private LogDAO log;	
 	
 	//page de connexion
 	@GetMapping({"/","/index"})
-	public String Index(HttpSession session)
+	public String Index(HttpSession session,Model model)
 	{
+		if(session.getAttribute("Erreur")!=null) model.addAttribute("Erreur", (String) session.getAttribute("Erreur"));
 		if(session.getAttribute("user")==null)
 			return "index";
-		else
+		else {
+				model.addAttribute("page", "main");
 			return "home";
+		}
+			
 	}
 	
 	//controlleur de connexion
@@ -107,10 +117,16 @@ public class MainController {
 
 	//test
 	@GetMapping("/test")	
-	public String test(HttpSession session,
-				@RequestParam("ip")String ip
-				)
-		{   
+	public String test(HttpSession session
+				) throws serveurException
+		{  
+			List<BdServeur> bd = bdservdao.findAll();
+			
+			if(session.getAttribute("user")==null) return "redirect:/";				
+			Utilisateur user = (Utilisateur) session.getAttribute("user");	
+			
+			ServeurDASSH.listeSauvegarde(user,bd.get(0).getServeur());
+
 			return "redirect:/";
 		}
 	
@@ -118,22 +134,60 @@ public class MainController {
 	@GetMapping("/supervision")	
 	public String supervision(HttpSession session,
 				Model model) throws sshException
-		{   			
+		{
+			if(session.getAttribute("user")==null) return "redirect:/";				
+			Utilisateur user = (Utilisateur) session.getAttribute("user");
+			
 			List<BdServeur> bdserveur = bdservdao.findByStatus("deploy");	
 			for (BdServeur bdServeur2 : bdserveur) {
-				
-				SshConnection connectionssh = SshConnection.CreerConnection(new SshConfig("192.168.237.3","root","123456",22));
 								
 				bdServeur2.setStat(new Stat(Superviseur.testMysql(bdServeur2.getIp_externe().toString()),"-","-","-"));
 					
 				for (dockerserveur dserv : bdServeur2.getDserveur()) {
-					Stat stat = Superviseur.statistique(dserv.getIp_docker().toString(), connectionssh);
-					dserv.setStat(new Stat(Superviseur.testMysql(dserv.getIp_docker().toString()),stat.getRAM(),stat.getDisque(),stat.getCPU()));
+					
+					Stat stat;
+					try {
+						
+						stat = DockerDASSH.statistique(dserv.getIp_docker().toString(), user);
+						dserv.setStat(new Stat(Superviseur.testMysql(dserv.getIp_docker().toString()),stat.getRAM(),stat.getDisque(),stat.getCPU()));
+					
+					} catch (serveurException e) {
+						model.addAttribute("Erreur", e.getMessage());
+					}					
 				}
 			}
 			
 			model.addAttribute("bdserv",bdserveur);
 			return "supervision";
 		}
+
+	//supervision
+	@GetMapping("/sauvegarde")	
+	public String sauvegarde(HttpSession session,
+					Model model) throws sshException
+			{
+				if(session.getAttribute("user")==null) return "redirect:/";				
+				Utilisateur user = (Utilisateur) session.getAttribute("user");
+				
+				List<Serveur> serveur = servdao.findAll();				
+				List<Sauvegarde> listSave = new ArrayList<>();
+				
+				for (Serveur Serveur2 : serveur) {
+
+						try {							
+								Sauvegarde save = new Sauvegarde();
+								save.setServ(Serveur2);
+								
+								String[] list = ServeurDASSH.listeSauvegarde(user, Serveur2);
+								save.setSauvegarde(list);
+								
+								listSave.add(save);					
+						} catch (serveurException e) {
+							model.addAttribute("Erreur", e.getMessage());
+						}			
+				}
+				model.addAttribute("save", listSave);
+				return "sauvegarde";
+			}
 
 }

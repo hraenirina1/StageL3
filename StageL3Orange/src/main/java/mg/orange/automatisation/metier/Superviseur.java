@@ -45,14 +45,15 @@ public class Superviseur {
 			 * 0verlay - 
 			 * */
 			//int i = Integer.parseInt(ligne[1]) + Integer.parseInt(ligne[2]);
-			stat.setRAM(""+ ligne[1] +"");	
+			if(ligne.length!=0) stat.setRAM(""+ ligne[1] +"");	
 			
-			Double j = Double.valueOf(ligne[3]) + Double.valueOf(ligne[4]);
+			if(ligne.length!=0) { Double j = Double.valueOf(ligne[3]) + Double.valueOf(ligne[4]); 
 			//Double k = j + Double.valueOf(ligne[5]);
 			
 			stat.setCPU(""+ j +"");
 			stat.setDisque(ligne[7]);
-				
+			
+			}
 			connectionssh.ExecuterCommandeRecupOut("pkill -fx 'nc "+ip+" 1234'");
 			
 			return stat;
