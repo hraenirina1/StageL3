@@ -54,6 +54,56 @@ public class BdServeurDASSH {
 		}
 	}
 	
+	private static String CommandeCreerFichierDockerHaproxy(BdServeur bd)
+	{ 
+		Fichier haproxy = new Fichier("ha.cfg");
+		haproxy.ajouterLigne("global\r\n" + 
+				"        log /dev/log local0\r\n" + 
+				"        log /dev/log local1 notice\r\n" + 
+				"\r\n" + 
+				"        user haproxy\r\n" + 
+				"        group haproxy\r\n" + 
+				"        daemon\r\n" + 
+				"\r\n" + 
+				"defaults\r\n" + 
+				"        log     global\r\n" + 
+				"        mode    http\r\n" + 
+				"        option  dontlognull\r\n" + 
+				"        contimeout 5000\r\n" + 
+				"        clitimeout 50000\r\n" + 
+				"        srvtimeout 50000\r\n" + 
+				"        errorfile 400 /etc/haproxy/errors/400.http\r\n" + 
+				"        errorfile 403 /etc/haproxy/errors/403.http\r\n" + 
+				"        errorfile 408 /etc/haproxy/errors/408.http\r\n" + 
+				"        errorfile 500 /etc/haproxy/errors/500.http\r\n" + 
+				"        errorfile 502 /etc/haproxy/errors/502.http\r\n" + 
+				"        errorfile 503 /etc/haproxy/errors/503.http\r\n" + 
+				"        errorfile 504 /etc/haproxy/errors/504.http\r\n" + 
+				"");
+		
+		haproxy.ajouterLigne("listen cluster_db \r\n" + 
+				"                bind 0.0.0.0:3306\r\n" + 
+				"");
+		haproxy.ajouterLigne("mode tcp");
+		haproxy.ajouterLigne("option mysql-check user haproxy");
+		haproxy.ajouterLigne("balance roundrobin");
+		
+		for (dockerserveur doc: bd.getDserveur()) {
+			haproxy.ajouterLigne("server "+ doc.getNom_docker_serveur() +" "+doc.getIp_docker()+":3306 check");
+		}
+		
+		haproxy.ajouterLigne("listen stats \r\n" + 
+				"                bind 0.0.0.0:80\r\n" + 
+				"        stats enable\r\n" + 
+				"        stats hide-version\r\n" + 
+				"        stats refresh 30s\r\n" + 
+				"        stats show-node\r\n" + 
+				"        stats auth castiel:h0809s12192n1\r\n" + 
+				"        stats uri /stats");		
+		
+		return "echo \""+ haproxy.toString() +"\" > " + haproxy.getNomFichier();
+	}
+	
 	//supprimer conf
 	private static void supprimerConf(Utilisateur user) throws serveurException
 	{ 
@@ -86,6 +136,7 @@ public class BdServeurDASSH {
 		Fichier init = new Fichier(destination);
 		init.ajouterLigne("CREATE USER 'su_root'@'%' IDENTIFIED BY '"+ mdp +"';\r\n" + 
 				"GRANT ALL ON *.* TO 'su_root'@'%';\r\n");
+		init.ajouterLigne("CREATE USER 'haproxy'@'%'");
 		
 		creerFichier(init,user);
 	}
@@ -131,7 +182,7 @@ public class BdServeurDASSH {
 		for(int j=1 ;j<bdserv.getDserveur().size();j++)
 		{
 			StringBuilder deplo = new StringBuilder();
-			deplo.append("docker run -d --memory="+ bdserv.getDserveur().get(j).getRam()+"m --cpus=" + bdserv.getDserveur().get(j).getCpu() + " --name " + bdserv.getDserveur().get(j).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(0).getNom_docker_serveur() +" ");
+			deplo.append("docker run -d --memory="+ bdserv.getDserveur().get(j).getRam()+"m --cpus=" + bdserv.getDserveur().get(j).getCpu() + " --name " + bdserv.getDserveur().get(j).getNom_docker_serveur() +" -h "+ bdserv.getDserveur().get(j).getNom_docker_serveur() +" ");
 			deplo.append("--env-file=env/node"+bdserv.getDserveur().get(j).getNom_docker_serveur() +".env ");
 			deplo.append("--net " +  bdserv.getNomBdServeur() + " ");
 			deplo.append(" --ip "+  bdserv.getDserveur().get(j).getIp_interne().toString() +" ");
@@ -145,6 +196,9 @@ public class BdServeurDASSH {
 			
 			deploy.ajouterLigne(deplo.toString());
 		}	
+		
+		deploy.ajouterLigne("docker run -d -it --name haproxy"+ bdserv.getNomBdServeur()+ " -p "+ bdserv.getIp_externe()+ ":3306:3306 -p "+ bdserv.getIp_externe()+ ":8888:80 hraenirina1/haproxy /bin/bash");
+		
 		deploy.ajouterLigne("exit 0;");
 		deploy.ajouterLigne("fi");
 		deploy.ajouterLigne("exit 1;");		
@@ -181,7 +235,7 @@ public class BdServeurDASSH {
 		save.ajouterLigne("DATE=\\`date +%Y%m%d-%H%M\\`");
 		save.ajouterLigne("PREFIX=\\${IPSERV}_mysql_backup");
 		save.ajouterLigne("PROGNAME=mysql-backup");
-		save.ajouterLigne("LOCKFILE=/var/tmp/\\${PROGNAME}.lock");
+		save.ajouterLigne("LOCKFILE=/var/tmp/\\${PROGNAME}"+bdServeur.getNomBdServeur()+".lock");
 		save.ajouterLigne("MYSQL=\"mysql -h \\${IPSERV} -u \\${USER_MYSQL} -p\\${PASS_MYSQL}\"");
 		save.ajouterLigne("MYSQLDUMP=\"mysqldump -h \\${IPSERV} -u \\${USER_MYSQL} -p\\${PASS_MYSQL}\"");
 		save.ajouterLigne("function log() {");
@@ -256,9 +310,7 @@ public class BdServeurDASSH {
 	{
 		try {
 			SshConnection sshConnex = SshConnection.CreerConnection(new SshConfig(user));	
-				for ( dockerserveur dserv : bdServeur.getDserveur()) {
-					sshConnex.ExecuterCommandeVerifRetour("(crontab -l; echo \"* * * * * bash "+ Script_destination+script +" "+ dserv.getIp_docker() +" su_root "+ bdServeur.getMysqlPasssword() + " \") | crontab -");
-				}			
+					sshConnex.ExecuterCommandeVerifRetour("(crontab -l; echo \"* * * * * bash "+ Script_destination+script +" "+ bdServeur.getIp_externe() +" su_root "+ bdServeur.getMysqlPasssword() + " \") | crontab -");		
 		} catch (sshException e) {
 				throw new serveurException(e.getMessage());
 		}
@@ -284,8 +336,29 @@ public class BdServeurDASSH {
 		{
 			DockerDASSH.configurerDocker(doc, bdServeur.getMysqlPasssword(), user);			
 		}
-		
+			
+		configurerBd(bdServeur, user);
+		System.out.println("----");
 		supprimerConf(user);
+		System.out.println("----");
 		sauvegarde(bdServeur,"/srv/mariadb/backup/",bdServeur.getNomBdServeur()+".sh", user);		
 	}
+
+public static void configurerBd(BdServeur bd, Utilisateur user) throws serveurException {
+	try {
+		
+			SshConnection sshConnex = SshConnection.CreerConnection(new SshConfig(user));
+			List<String> commandes = new ArrayList<>();
+			
+			commandes.add(CommandeCreerFichierDockerHaproxy(bd));
+			commandes.add("docker cp ha.cfg haproxy"+ bd.getNomBdServeur()+ ":/etc/haproxy/haproxy.cfg" );
+			
+			//lancement
+			commandes.add("docker exec haproxy"+ bd.getNomBdServeur()+ " service haproxy restart");
+			sshConnex.ExecuterCommande(commandes);
+		
+} catch (sshException e) {
+		throw new serveurException(e.getMessage());
+}
+}
 }

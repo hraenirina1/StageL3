@@ -30,6 +30,9 @@ public class DockerDASSH {
 				//teste de connexion				
 				SshConnection.CreerConnection(new SshConfig(user));	
 				
+				//deploy Ipbdserveur 
+				ServeurDASSH.miseEnPlaceIp(bd.getIp_externe(), "enp0s8", user, serv);
+				
 				//Ip à scanner
 				List<IP> adresseIp;
 				List<IP> adresseIpInterne;
@@ -190,26 +193,28 @@ public class DockerDASSH {
 				//stat	
 					String[] ligne = 
 							connectionssh.ExecuterCommandeRecupOutStat("nc "+ip+" 1234").split("\n");
-					System.out.println(ligne.toString());
-					/*
-					 * 1 - ram total
-					 * 2 - ram libre
-					 * 3 - ram utiliser
-					 * 
-					 * 4 - cpu sys
-					 * 5 - cpu ni
-					 * 6 - cpu libre
-					 * 
-					 * 0verlay - 
-					 * */
-					//int i = Integer.parseInt(ligne[1]) + Integer.parseInt(ligne[2]);
-					stat.setRAM(""+ ligne[1] +"");	
-					
-					Double j = Double.valueOf(ligne[3]) + Double.valueOf(ligne[4]);
-					//Double k = j + Double.valueOf(ligne[5]);
-					
-					stat.setCPU(""+ j +"");
-					stat.setDisque(ligne[7]);
+					String[] ligne2 = connectionssh.ExecuterCommandeRecupOut("docker stats --no-stream --format \"{{.Name}}\n{{.CPUPerc}}\n{{.MemPerc}}\" testlundi1-galera-2").split("\n");
+					if(ligne.length>7)
+					{
+						/*
+						 * 1 - ram total
+						 * 2 - ram libre
+						 * 3 - ram utiliser
+						 * 
+						 * 4 - cpu sys
+						 * 5 - cpu ni
+						 * 6 - cpu libre
+						 * 
+						 * 0verlay - 
+						 * */
+						//int i = Integer.parseInt(ligne[1]) + Integer.parseInt(ligne[2]);
+						stat.setRAM(""+ ligne2[2] +"");	
+						Double j = Double.valueOf(ligne[3]) + Double.valueOf(ligne[4]);
+						//Double k = j + Double.valueOf(ligne[5]);
+						
+						stat.setCPU(""+ ligne2[1] +"");
+						stat.setDisque(ligne[7]);
+					}
 						
 					connectionssh.ExecuterCommandeRecupOut("pkill -fx 'nc "+ip+" 1234'");
 					

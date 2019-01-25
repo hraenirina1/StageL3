@@ -201,7 +201,6 @@ public class SshConnection {
 			
 			//executer commande
 			((ChannelExec)terminal).setCommand(commande);
-			System.out.print(commande);
 			
 			//ouverture du terminal
 			terminal.connect();
@@ -217,7 +216,6 @@ public class SshConnection {
 	                int i = in.read(tmp, 0, 1024);
 	                if (i < 0)
 	                    break;
-	                System.out.print(new String(tmp, 0, i));
 	                Retour.append(new String(tmp, 0, i));	                
 	            }
 	            

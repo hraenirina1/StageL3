@@ -15,13 +15,10 @@ public class Superviseur {
 	{
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");				
-			DriverManager.getConnection("jdbc:mysql://"+ip+"/mysql");
+			DriverManager.getConnection("jdbc:mysql://"+ip+"/","haproxy","").close();
 			return true;
 		} catch (ClassNotFoundException | SQLException es) {
-			String Error = es.getMessage();
-			if(Error.contains("Acc"))
-				return true;
-			else
+				System.out.println(es.getMessage());
 				return false;
 		}
 	}

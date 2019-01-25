@@ -12,12 +12,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 
 import mg.orange.automatisation.dao.BdServeurDAO;
+import mg.orange.automatisation.dao.DockerServeurDAO;
 import mg.orange.automatisation.dao.IPDAO;
 import mg.orange.automatisation.dao.LogDAO;
 import mg.orange.automatisation.dao.ServeurDAO;
-import mg.orange.automatisation.dassh.BdServeurDASSH;
 import mg.orange.automatisation.dassh.DockerDASSH;
 import mg.orange.automatisation.dassh.ServeurDASSH;
 import mg.orange.automatisation.entities.BdServeur;
@@ -42,6 +44,8 @@ public class MainController {
 	private BdServeurDAO bdservdao;
 	@Autowired
 	private ServeurDAO servdao;
+	@Autowired
+	private DockerServeurDAO dockdao;
 	@Autowired
 	private LogDAO log;	
 	
@@ -116,18 +120,53 @@ public class MainController {
 	}
 
 	//test
-	@GetMapping("/test")	
-	public String test(HttpSession session
+	@GetMapping(value = "/test", produces = "application/json")	
+	public @ResponseBody List<Double> test(HttpSession session,
+		   @RequestParam("serv")String adr			
 				) throws serveurException
 		{  
-			List<BdServeur> bd = bdservdao.findAll();
+			List<Double> rep = new ArrayList<>();
+		try {
 			
-			if(session.getAttribute("user")==null) return "redirect:/";				
+						
+			if(session.getAttribute("user")==null) return rep;				
 			Utilisateur user = (Utilisateur) session.getAttribute("user");	
 			
-			ServeurDASSH.listeSauvegarde(user,bd.get(0).getServeur());
+			dockerserveur doc = dockdao.getOne(Long.valueOf(adr));			
+			
+			Stat stat;
+				
+				stat = DockerDASSH.statistique(doc.getIp_docker().toString(), user);
 
-			return "redirect:/";
+				rep.add(Double.valueOf(stat.getCPU()));
+				rep.add(Double.valueOf(100) - Double.valueOf(stat.getCPU()));
+				
+				System.out.println(stat.getRAM());
+				
+				rep.add(Double.valueOf(doc.getRam()) * 1024 - Double.valueOf(stat.getRAM()));
+				rep.add(Double.valueOf(stat.getRAM()));				
+				
+				rep.add(Double.valueOf(stat.getDisque().replaceAll("%", "")));
+				rep.add(Double.valueOf(100)-Double.valueOf(stat.getDisque().replaceAll("%", "")));
+				
+				if(Superviseur.testMysql(doc.getIp_docker().toString()))
+				{
+					rep.add(Double.valueOf("0"));
+				}
+				else
+				{
+					rep.add(Double.valueOf("1"));
+				}        
+				
+				
+			} catch (serveurException e) {
+			}
+		catch(Exception e) {			
+			e.printStackTrace();
+		}
+		return rep;
+				
+			
 		}
 	
 	//supervision
@@ -160,7 +199,19 @@ public class MainController {
 			model.addAttribute("bdserv",bdserveur);
 			return "supervision";
 		}
-
+	@GetMapping("/detail")	
+	public String supervisionUn(HttpSession session,
+			@RequestParam("serv")String adr,			
+			Model model) throws sshException
+	{
+		
+		if(session.getAttribute("user")==null) return "redirect:/";				
+		Utilisateur user = (Utilisateur) session.getAttribute("user");
+		
+		model.addAttribute("dock", adr);
+		return "supervisionDocker";
+	}
+	
 	//supervision
 	@GetMapping("/sauvegarde")	
 	public String sauvegarde(HttpSession session,
