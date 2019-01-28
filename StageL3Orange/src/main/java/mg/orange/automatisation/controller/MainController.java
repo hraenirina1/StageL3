@@ -32,6 +32,7 @@ import mg.orange.automatisation.entities.Utilisateur;
 import mg.orange.automatisation.entities.dockerserveur;
 import mg.orange.automatisation.exception.serveurException;
 import mg.orange.automatisation.exception.sshException;
+import mg.orange.automatisation.metier.ServeurMetier;
 import mg.orange.automatisation.metier.Superviseur;
 
 @Controller
@@ -73,6 +74,7 @@ public class MainController {
 					{		
 		try {
 			
+			ServeurMetier serv = new ServeurMetier();
 			//essai de connexion ssh
 			ServeurDASSH.testerServeur(new Utilisateur(user,Integer.parseInt(port), adr,pass));
 			
