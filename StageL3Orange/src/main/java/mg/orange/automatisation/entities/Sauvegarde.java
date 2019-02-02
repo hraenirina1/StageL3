@@ -1,17 +1,17 @@
 package mg.orange.automatisation.entities;
 
 public class Sauvegarde {
-	private Serveur serv;
+	private PServeur serv;
 	private String[] sauvegarde;
 		
 	public Sauvegarde() {
 	}
 
-	public Serveur getServ() {
+	public PServeur getServ() {
 		return serv;
 	}
 
-	public void setServ(Serveur serv) {
+	public void setServ(PServeur serv) {
 		this.serv = serv;
 	}
 

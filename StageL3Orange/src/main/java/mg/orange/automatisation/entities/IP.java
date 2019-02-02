@@ -30,6 +30,7 @@ public class IP {
 		}
 		return null;
 	}
+	
 	public IP(Integer part1, Integer part2, Integer part3, Integer part4) {
 		super();
 		this.part1 = part1;
