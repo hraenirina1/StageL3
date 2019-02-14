@@ -32,7 +32,7 @@
            <h4><i class="fa fa-angle-right"></i> Ajout d'un serveur de base de donnee</h4>
             <div class="form-panel">
               <div class="form">
-                <form class="cmxform form-horizontal style-form" id="signupForm" method="post" action="/BdServeurAjout">
+                <form class="cmxform form-horizontal style-form" id="signupForm" method="post" action="BdServeurAjout">
                 
                   <div class="form-group ">
                     <label for="nomserveur" class="control-label col-lg-4"> Nom du serveur de base de donnees </label>
@@ -95,7 +95,7 @@
                     <label for="nomserveur" class="control-label col-lg-4"> Serveur Physique </label>
                     <div class="col-lg-8">
                       <select class="form-control col-lg-4 cocl-lg-offset-3" name="idserveur">
-		                  <option th:each="serv:${serveur}" th:value="${serv.id_serveur}" th:utext="${' ' +serv.nom + ' --- ' + serv.ip.part1 + '.' + serv.ip.part2 + '.' + serv.ip.part3 + '.' + serv.ip.part4 + ' '}"> </option>
+		                  <option th:each="serv:${serveur}" th:value="${serv.id_appareil}" th:utext="${' ' +serv.nom + ' --- ' + serv.ip.part1 + '.' + serv.ip.part2 + '.' + serv.ip.part3 + '.' + serv.ip.part4 + ' '}"> </option>
 		                </select>
                     </div>
                   </div>

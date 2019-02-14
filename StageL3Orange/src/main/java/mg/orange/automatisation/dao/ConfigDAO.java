@@ -1,13 +1,13 @@
-//package mg.orange.automatisation.dao;
-//
-//import java.util.List;
-//
-//import org.springframework.data.jpa.repository.JpaRepository;
-//import mg.orange.automatisation.entities.Config;
-//
-//public interface ConfigDAO extends JpaRepository<Config, Long> {
-//	//public List<Config> findByType(String Type);
-//}
+package mg.orange.automatisation.dao;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import mg.orange.automatisation.entities.Config;
+
+public interface ConfigDAO extends JpaRepository<Config, Long> {
+	public List<Config> findByType(String Type);
+}
 //
 ////config.save(new Config("Base", "WSREP_ON"));
 ////config.save(new Config("Base", "WSREP_PROVIDER"));

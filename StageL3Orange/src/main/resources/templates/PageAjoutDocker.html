@@ -34,12 +34,12 @@
            <div class="form-panel">
               
               <div th:if="${ListDockerServeur.size()==0}" class="form">
-                <form class="cmxform form-horizontal style-form" id="signupForm" method="post" action="/dockerServeurAjout">
+                <form class="cmxform form-horizontal style-form" id="signupForm" method="post" action="dockerServeurAjout">
                 
                   <div class="form-group col-lg-12">
-                    <label for="nomserveur" class="control-label col-lg-6"> Nombre de serveur à deployer </label>
+                    <label for="nom" class="control-label col-lg-6"> Nombre de serveur à deployer </label>
                     <div class="col-lg-2">
-                      <input class=" form-control" id="nomserveur" name="nbServ" type="number" required/>
+                      <input class=" form-control" id="nb_bd" name="nbServ" type="number" max="10" required/>
                       <input class=" form-control" id="nomserveur" name="bdServ" type="hidden" th:attr="value=${bdserv}" required/>
                     </div>
                     
@@ -52,12 +52,19 @@
                     <div class="col-lg-2">
                       <input class=" form-control" id="nomserveur" name="cpu" type="number" step="any" required/>
                     </div>
+                  </div>
+                  <div class="form-group col-lg-12">
+                    <div class="col-lg-12">
+                      	<button class="btn btn-theme col-lg-12" type="button" id="btn-ip"> IP manuel </button> 
+                    </div>      
+                   </div>
+                   <div class="form-group col-lg-12" id="ip_place"></div>
                     
-                    <div class="col-lg-4">
+                    <div class="form-group col-lg-12">
+                    <div class="col-lg-12">
                       <button class="btn btn-theme col-lg-12" type="submit"> Ajouter </button>                      
                     </div>
                   </div>
-                  
                   
                 </form>
               </div>
@@ -75,23 +82,23 @@
                 <tbody>
                   <tr th:each="serv:${ListDockerServeur}">
                     <td>
-                      <a href="/bdServeurList" th:href="@{'/dockerServeurConfig?dockerServ=' + ${serv.id_docker_serveur}}">
+                      <a href="bdServeurList" th:href="@{'dockerServeurConfig?dockerServ=' + ${serv.id_appareil}}">
                       	<font style="vertical-align: inherit;">
                       		<font style="vertical-align: inherit;">
-                      			<span th:utext="${serv.nom_docker_serveur}"></span>
+                      			<span th:utext="${serv.nom}"></span>
                       		</font>
                       	</font>
                      </a>
                     </td>
                     <!-- + '(' + serv.bdserveur.ip_externe.part1 + '.'+ serv.bdserveur.ip_externe.part2 + '.'+ serv.bdserveur.ip_externe.part3 + '.'+ serv.bdserveur.ip_externe.part4 + ')' -->
                     <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
-                    	<span th:utext="${serv.bdserveur.nomBdServeur}"></span>
+                    	<span th:utext="${serv.bdserveur.nom}"></span>
                     </font></font></td>
-                    <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.ip_docker.part1 + '.' + serv.ip_docker.part2 + '.' +serv.ip_docker.part3 + '.' + serv.ip_docker.part4 }"></span></font></font></td>
+                    <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.ip.part1 + '.' + serv.ip.part2 + '.' +serv.ip.part3 + '.' + serv.ip.part4 }"></span></font></font></td>
                     <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serv.ip_interne.part1 + '.' + serv.ip_interne.part2 + '.' +serv.ip_interne.part3 + '.' + serv.ip_interne.part4 }"></span></font></font></td>
                     <td>
-                      <a href="/bdServeurConfig" th:href="@{'/dockerServeurConfig?dockerServ=' + ${serv.id_docker_serveur}}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>
-                      <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i></button>
+                      <a href="bdServeurConfig" th:href="@{'dockerServeurConfig?dockerServ=' + ${serv.id_appareil}}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>
+                      <!--<button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i></button>-->
                     </td>
                   </tr>                  
                 </tbody>
@@ -120,5 +127,70 @@
 	<p th:insert="script"></p>
 	<p th:fragment="script"></p>
 	
+	<script type="text/javascript">
+		var manuelle = 0;
+		
+		$("#nb_bd").focus(function(){
+
+			if(manuelle==1){
+				
+				//desactive
+				$("#ip_place").html("");
+				$("#btn-ip").text("IP Manuel");
+				manuelle = 0;
+			}
+				
+		});
+		
+		$("#btn-ip").click(function(){
+			
+			if(manuelle == 0)
+				{
+					if($("#nb_bd").val()==null || $("#nb_bd").val()==0)
+					{						
+						alert("renseigner le nombre de node");
+					}
+					else if($("#nb_bd").val()>10)
+						{
+							alert("nombre trop grand");
+						}
+					else
+					{
+						var ip = "<div class=\"col-lg-12\">"
+						+ "<input class=\"col-xs-3 text-center\" id=\"ip1\" name=\"ip1\" type=\"number\" min=\"0\" max=\"255\" required/>"
+						+ "<input class=\"col-xs-3 text-center\" id=\"ip2\" name=\"ip2\" type=\"number\" min=\"0\" max=\"255\" required/>"
+                        + "<input class=\"col-xs-3 text-center\" id=\"ip3\" name=\"ip3\" type=\"number\" min=\"0\" max=\"255\" required/>"
+                        + "<input class=\"col-xs-3 text-center\" id=\"ip4\" name=\"ip4\" type=\"number\" min=\"0\" max=\"255\" required />"
+                      	+ "</div>";
+                      	
+						var html = "";
+						
+						var i = 0;
+						while(i<$("#nb_bd").val())
+						{
+							html = html + ip;
+							i++;
+						}
+						
+						
+						//active
+						$("#ip_place").html(html);						
+						html = "";
+						$("#btn-ip").text("IP Auto");
+						manuelle = 1;
+					}
+				}
+			else
+				{
+				
+					//desactive
+					$("#ip_place").html("");
+					$("#btn-ip").text("IP Manuel");
+					manuelle = 0;
+				}
+			
+		});
+		
+	</script>
 </body>
 </html>

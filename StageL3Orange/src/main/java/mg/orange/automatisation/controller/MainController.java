@@ -1,247 +1,229 @@
-//package mg.orange.automatisation.controller;
+package mg.orange.automatisation.controller;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import mg.orange.automatisation.metier.DockerMetier;
+import mg.orange.automatisation.metier.ServeurMetier;
+import mg.orange.automatisation.entities.BDServeur;
+import mg.orange.automatisation.entities.DockerServeur;
+import mg.orange.automatisation.entities.IP;
+
+import mg.orange.automatisation.entities.Sauvegarde;
+import mg.orange.automatisation.entities.Stat;
+import mg.orange.automatisation.entities.Utilisateur;
+import mg.orange.automatisation.exception.serveurException;
+import mg.orange.automatisation.exception.sshException;
+
+@Controller
+public class MainController {
+
+	@Autowired
+	ServeurMetier serv;
+	@Autowired
+	DockerMetier dock;
+	
+	//page de connexion
+	@GetMapping({"/","/index","/connexion"})
+	public String Index(HttpSession session,Model model)
+	{
+		if(session.getAttribute("Erreur")!=null) model.addAttribute("Erreur", (String) session.getAttribute("Erreur"));
+		if(session.getAttribute("user")==null)
+			return "PageConnexion";
+		else {
+				model.addAttribute("page", "main");
+			return "PagePrincipale";
+		}
+			
+	}
+	
+	//page de connexion
+		@PostMapping({"/test"})
+		public String test(HttpSession session,
+				@RequestParam MultiValueMap<String, String> parametre_multiple,
+				Model model)
+		{
+			
+			List<String> ip_part1 = parametre_multiple.get("ip1");
+			List<String> ip_part2 = parametre_multiple.get("ip2");
+			List<String> ip_part3 = parametre_multiple.get("ip3");
+			List<String> ip_part4 = parametre_multiple.get("ip4");
+			
+			int i = 0;
+			
+			List<IP> ip = new ArrayList<>();
+			
+			for (String string: ip_part1) {
+				ip.add(new IP(Integer.parseInt(string),Integer.parseInt(ip_part2.get(i)),Integer.parseInt(ip_part3.get(i)),Integer.parseInt(ip_part4.get(i))));
+				i++;
+			}
+			
+			for (IP ip2 : ip) {
+				System.out.println(ip2);
+			}
+			
+			return "PageConnexion";
+				
+		}
+	
+	//controlleur de connexion
+	@PostMapping(value="/connexion")
+	public String connexionPost(HttpSession session,
+			@RequestParam("serv_adr")String adr,
+			@RequestParam("serv_user")String user,
+			@RequestParam("serv_pass")String pass,
+			@RequestParam("serv_port")String port,Model model) 
+					{		
+		try {
+			
+				Utilisateur utilisateur = new Utilisateur(user,Integer.parseInt(port), adr,pass);
+				serv.testerConnection(utilisateur);
+			
+				//recuperer l'adresse ip
+				IP ip = IP.IPfromString(adr);
+			
+			
+				//reponse au connexion ssh
+				session.setAttribute("user",utilisateur);
+			
+				if(serv.testerIPSiExiste(ip))
+				{
+					//log.save(new Log(user, "Info", "connexion au nouveau serveur "+ adr, false, new Date()));
+					model.addAttribute("ip", ip);
+					return "Ajoutserveur";
+				}
+				else
+				{
+					//log.save(new Log(user, "Info", "connexion au serveur "+ adr, false, new Date()));
+					return "PagePrincipale";
+				}
+
+		}
+		catch(serveurException e){
+			model.addAttribute("Erreur", "Impossible d'établir la connexion avec le serveur " + adr + ":" + port + " !" + e.getMessage());
+			return "PageConnexion";
+		}		
+	}
+	
+	//deconnexion
+	@GetMapping("/deconnexion")	
+	public String Deconnection(HttpSession session)
+	{	
+		//log.save(new Log(user.getUser(), "Info", "connexion au nouveau serveur "+ user.getAdresse(), false, new Date()));
+		session.invalidate();
+		return "redirect:/";
+	}
 //
-//import java.util.ArrayList;
-//import java.util.Date;
-//import java.util.List;
-//
-//import javax.servlet.http.HttpSession;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.RequestParam;
-//import org.springframework.web.bind.annotation.ResponseBody;
-//
-//
-//import mg.orange.automatisation.dao.BdServeurDAO;
-//import mg.orange.automatisation.dao.DockerServeurDAO;
-//import mg.orange.automatisation.dao.IPDAO;
-//import mg.orange.automatisation.dao.LogDAO;
-//import mg.orange.automatisation.dao.ServeurDAO;
-//import mg.orange.automatisation.dassh.DockerDASSH;
-//import mg.orange.automatisation.dassh.ServeurDASSH;
-//import mg.orange.automatisation.entities.BDServeur;
-//import mg.orange.automatisation.entities.IP;
-//import mg.orange.automatisation.entities.Log;
-//import mg.orange.automatisation.entities.Sauvegarde;
-//import mg.orange.automatisation.entities.PServeur;
-//import mg.orange.automatisation.entities.Stat;
-//import mg.orange.automatisation.entities.Utilisateur;
-//import mg.orange.automatisation.entities.DockerServeur;
-//import mg.orange.automatisation.exception.serveurException;
-//import mg.orange.automatisation.exception.sshException;
-//import mg.orange.automatisation.metier.ServeurMetier;
-//import mg.orange.automatisation.metier.Superviseur;
-//
-//@Controller
-//public class MainController {
-//
-//	//DAO
-//	@Autowired
-//	private IPDAO ipdao; 
-//	@Autowired
-//	private BdServeurDAO bdservdao;
-//	@Autowired
-//	private ServeurDAO servdao;
-//	@Autowired
-//	private DockerServeurDAO dockdao;
-//	@Autowired
-//	private LogDAO log;	
-//	
-//	//page de connexion
-//	@GetMapping({"/","/index"})
-//	public String Index(HttpSession session,Model model)
-//	{
-//		if(session.getAttribute("Erreur")!=null) model.addAttribute("Erreur", (String) session.getAttribute("Erreur"));
-//		if(session.getAttribute("user")==null)
-//			return "PageConnexion";
-//		else {
-//				model.addAttribute("page", "main");
-//			return "PagePrincipale";
-//		}
-//			
-//	}
-//	
-//	//controlleur de connexion
-//	@PostMapping(value="/connexion")
-//	public String connexionPost(HttpSession session,
-//			@RequestParam("serv_adr")String adr,
-//			@RequestParam("serv_user")String user,
-//			@RequestParam("serv_pass")String pass,
-//			@RequestParam("serv_port")String port,Model model) 
-//					{		
-//		try {
-//			
-//			ServeurMetier serv = new ServeurMetier();
-//			
-//			//essai de connexion ssh
-//			ServeurDASSH.testerServeur(new Utilisateur(user,Integer.parseInt(port), adr,pass));
-//			
-//			//recuperer l'adresse ip
-//			IP ip = IP.IPfromString(adr);
-//			
-//			List<IP> listip = ipdao.findByPart1AndPart2AndPart3AndPart4AllIgnoreCase(ip.getPart1(), ip.getPart2(), ip.getPart3(), ip.getPart4());
-//			
-//			//reponse au connexion ssh
-//			session.setAttribute("user", new Utilisateur(user,Integer.parseInt(port), adr,pass));
-//			
-//			if(listip.size()==0)
-//			{
-//				log.save(new Log(user, "Info", "connexion au nouveau serveur "+ adr, false, new Date()));
-//				model.addAttribute("ip", ip);
-//				return "Ajoutserveur";
-//			}
-//			else
-//			{
-//				log.save(new Log(user, "Info", "connexion au serveur "+ adr, false, new Date()));
-//				return "home";
-//			}
-//				
-//		}
-//		catch(serveurException e){
-//			model.addAttribute("Erreur", "Impossible d'établir la connexion avec le serveur " + adr + ":" + port + " !" + e.getMessage());
-//			return "index";
-//		}		
-//	}
-//	@GetMapping("/connexion")
-//	public String connexionGet(HttpSession session){
-//			return "redirect:/";
-//	}
-//	
-//	//deconnexion
-//	@GetMapping("/deconnexion")	
-//	public String Deconnection(HttpSession session)
-//	{
-//		if(session.getAttribute("user")==null) return "redirect:/";				
-//		Utilisateur user = (Utilisateur) session.getAttribute("user");		
-//		log.save(new Log(user.getUser(), "Info", "connexion au nouveau serveur "+ user.getAdresse(), false, new Date()));
-//		
-//		session.invalidate();
-//		return "redirect:/";
-//	}
-//
-//	//test
-//	@GetMapping(value = "/test", produces = "application/json")	
-//	public @ResponseBody List<Double> test(HttpSession session,
-//		   @RequestParam("serv")String adr			
-//				) throws serveurException
-//		{  
-//			List<Double> rep = new ArrayList<>();
-//		try {
-//			
-//						
-//			if(session.getAttribute("user")==null) return rep;				
-//			Utilisateur user = (Utilisateur) session.getAttribute("user");	
-//			
-//			DockerServeur doc = dockdao.getOne(Long.valueOf(adr));			
-//			
-//			Stat stat;
-//				
-//				stat = DockerDASSH.statistique(doc.getIp_docker().toString(), user);
-//
-//				rep.add(Double.valueOf(stat.getCPU()));
-//				rep.add(Double.valueOf(100) - Double.valueOf(stat.getCPU()));
-//				
-//				System.out.println(stat.getRAM());
-//				
-//				rep.add(Double.valueOf(doc.getRam()) * 1024 - Double.valueOf(stat.getRAM()));
-//				rep.add(Double.valueOf(stat.getRAM()));				
-//				
-//				rep.add(Double.valueOf(stat.getDisque().replaceAll("%", "")));
-//				rep.add(Double.valueOf(100)-Double.valueOf(stat.getDisque().replaceAll("%", "")));
-//				
-//				if(Superviseur.testMysql(doc.getIp_docker().toString()))
-//				{
-//					rep.add(Double.valueOf("0"));
-//				}
-//				else
-//				{
-//					rep.add(Double.valueOf("1"));
-//				}        
-//				
-//				
-//			} catch (serveurException e) {//
-//			}
-//		catch(Exception e) {			
-//			e.printStackTrace();
-//		}
-//		return rep;
-//				
-//			
-//		}
-//	
-//	//supervision
-//	@GetMapping("/supervision")	
-//	public String supervision(HttpSession session,
-//				Model model) throws sshException
-//		{
-//			if(session.getAttribute("user")==null) return "redirect:/";				
-//			Utilisateur user = (Utilisateur) session.getAttribute("user");
-//			
-//			List<BDServeur> bdserveur = bdservdao.findByStatus("deploy");	
-//			for (BDServeur bdServeur2 : bdserveur) {
-//								
-//				bdServeur2.setStat(new Stat(Superviseur.testMysql(bdServeur2.getIp_externe().toString()),"-","-","-"));
-//					
-//				for (DockerServeur dserv : bdServeur2.getDserveur()) {
-//					
-//					Stat stat;
-//					try {
-//						
-//						stat = DockerDASSH.statistique(dserv.getIp_docker().toString(), user);
-//						dserv.setStat(new Stat(Superviseur.testMysql(dserv.getIp_docker().toString()),stat.getRAM(),stat.getDisque(),stat.getCPU()));
-//					
-//					} catch (serveurException e) {
-//						model.addAttribute("Erreur", e.getMessage());
-//					}					
-//				}
-//			}
-//			
-//			model.addAttribute("bdserv",bdserveur);
-//			return "supervision";
-//		}
-//	@GetMapping("/detail")	
-//	public String supervisionUn(HttpSession session,
-//			@RequestParam("serv")String adr,			
-//			Model model) throws sshException
-//	{
-//		
-//		if(session.getAttribute("user")==null) return "redirect:/";				
-//		Utilisateur user = (Utilisateur) session.getAttribute("user");
-//		
-//		model.addAttribute("dock", adr);
-//		return "supervisionDocker";
-//	}
-//	
-//	//supervision
-//	@GetMapping("/sauvegarde")	
-//	public String sauvegarde(HttpSession session,
-//					Model model) throws sshException
-//			{
-//				if(session.getAttribute("user")==null) return "redirect:/";				
-//				Utilisateur user = (Utilisateur) session.getAttribute("user");
-//				
-//				List<PServeur> serveur = servdao.findAll();				
-//				List<Sauvegarde> listSave = new ArrayList<>();
-//				
-//				for (PServeur Serveur2 : serveur) {
-//
-//						try {							
-//								Sauvegarde save = new Sauvegarde();
-//								save.setServ(Serveur2);
-//								
-//								String[] list = ServeurDASSH.listeSauvegarde(user, Serveur2);
-//								save.setSauvegarde(list);
-//								
-//								listSave.add(save);					
-//						} catch (serveurException e) {
-//							model.addAttribute("Erreur", e.getMessage());
-//						}			
-//				}
-//				model.addAttribute("save", listSave);
-//				return "sauvegarde";
-//			}
-//
-//}
+	//test
+	@GetMapping(value = "/test", produces = "application/json")	
+	public @ResponseBody List<Double> test(HttpSession session,
+		   @RequestParam("serv")String adr			
+				) throws serveurException
+		{  
+			List<Double> rep = new ArrayList<>();
+		try {
+			
+						
+			if(session.getAttribute("user")==null) return rep;				
+			Utilisateur user = (Utilisateur) session.getAttribute("user");	
+			
+			DockerServeur doc = dock.recuperer(Long.valueOf(adr));			
+			
+			Stat stat;
+				
+				stat = dock.statistique(doc, user);
+
+				rep.add(Double.valueOf(stat.getCPU()));
+				rep.add(Double.valueOf(100) - Double.valueOf(stat.getCPU()));
+				
+				
+				rep.add(Double.valueOf(doc.getRam()) * Double.valueOf(stat.getRAM()) / 100);
+				rep.add(Double.valueOf(doc.getRam()));				
+				
+
+				rep.add(Double.valueOf(stat.getDisque().replaceAll("kB", "")));
+				rep.add(Double.valueOf(100) * Double.valueOf(stat.getDisque().replaceAll("kB", "")));
+				
+				if(stat.getMysql())
+				{
+					rep.add(Double.valueOf("0"));
+				}
+				else
+				{
+					rep.add(Double.valueOf("1"));
+				}        
+				
+				
+			} catch (serveurException e) {
+			}
+		catch(Exception e) {			
+			e.printStackTrace();
+		}
+		return rep;
+				
+			
+		}
+	
+	//supervision
+	@GetMapping("/supervision")	
+	public String supervision(HttpSession session,
+				Model model) throws sshException
+		{
+			if(session.getAttribute("user")==null) return "redirect:/";				
+			Utilisateur user = (Utilisateur) session.getAttribute("user");
+			
+			List<BDServeur> bdserveur;
+			
+			try {
+				bdserveur = serv.supervision(user);
+				model.addAttribute("bdserv",bdserveur);
+			} catch (serveurException e) {				
+				e.printStackTrace();
+			}
+			
+			
+			return "supervision";
+		}
+	@GetMapping("/detail")	
+	public String supervisionUn(HttpSession session,
+			@RequestParam("serv")String adr,			
+			Model model) throws sshException
+	{
+		
+		if(session.getAttribute("user")==null) return "redirect:/";				
+		
+		model.addAttribute("dock", adr);
+		return "supervisionDocker";
+	}
+	
+	//supervision
+	@GetMapping("/sauvegarde")	
+	public String sauvegarde(HttpSession session,
+					Model model) throws sshException
+			{
+				if(session.getAttribute("user")==null) return "redirect:/";				
+				Utilisateur user = (Utilisateur) session.getAttribute("user");
+				
+				List<Sauvegarde> listSave;
+				
+				try {
+					listSave = serv.listeSauvegarde(user);
+					model.addAttribute("save", listSave);
+				} catch (serveurException e) {
+					e.printStackTrace();
+				}
+				
+				return "PageSauvegarde";
+			}
+
+}

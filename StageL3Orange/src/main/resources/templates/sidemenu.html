@@ -32,12 +32,12 @@
 			</div>
 			
 			
-          <p class="centered"><a href="profile.html"><img src="img/ui-sam.jpg" class="img-circle" width="80"></a></p>
+          <p class="centered"><a href=""><img src="img/ui-sam.jpg" class="img-circle" width="80"></a></p>
           <h5 class="centered"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:if="${session.user}" th:utext="${session.user.user + '@' + session.user.adresse}"></span></font></font></h5>
 
           <!-- serveur -->
           <li class="sub-menu dcjq-parent-li">
-            <a href="/serveurList" th:class="${page=='listServeur'} ? 'dcjq-parent active' : 'dcjq-parent'">
+            <a href="serveurList" th:class="${page=='listServeur'} ? 'dcjq-parent active' : 'dcjq-parent'">
               <i class="fa fa-desktop"></i>
               <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Serveur </font></font></span>
               <span class="dcjq-icon"></span>
@@ -46,7 +46,7 @@
           
           <!-- reseau -->
           <li class="sub-menu dcjq-parent-li">
-            <a href="/reseauList" class="dcjq-parent ">
+            <a href="reseauList" class="dcjq-parent ">
               <i class="fa fa-desktop"></i>
               <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Reseau </font></font></span>
               <span class="dcjq-icon"></span>
@@ -62,16 +62,16 @@
              </a>
              
             <ul class="sub" style="display: none;">
-            	<li th:class="${page=='listBdServeur' || page=='listBdServ' } ? 'active' : ''"><a href="/bdServeurList"> Liste </a></li>
-              	<li><a href="/bdServeurAjout"> Ajouter </a></li>
-              	<li><a href="/bdServeurDeployer"> Deployer </a></li>
-              	<li><a href="/bdServeurEncours"> Travailler </a></li>
+            	<li th:class="${page=='listBdServeur' || page=='listBdServ' } ? 'active' : ''"><a href="bdServeurList"> Liste </a></li>
+              	<li><a href="bdServeurAjout"> Ajouter </a></li>
+              	<li><a href="bdServeurDeployer"> Deployer </a></li>
+              	<li><a href="bdServeurEncours"> Travailler </a></li>
             </ul>            
           </li>
 		
 		<!-- supervision -->
           <li class="sub-menu dcjq-parent-li">
-            <a href="/supervision" class="dcjq-parent ">
+            <a href="supervision" class="dcjq-parent ">
               <i class="fa fa-desktop"></i>
               <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Supervision </font></font></span>
               <span class="dcjq-icon"></span>
@@ -80,7 +80,7 @@
           
           <!-- sauvegarde -->
           <li class="sub-menu dcjq-parent-li">
-            <a href="/sauvegarde" class="dcjq-parent ">
+            <a href="sauvegarde" class="dcjq-parent ">
               <i class="fa fa-desktop"></i>
               <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Sauvegarde</font></font></span>
               <span class="dcjq-icon"></span>

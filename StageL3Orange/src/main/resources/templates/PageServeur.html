@@ -29,39 +29,29 @@
           <div class="col-lg-8 col-lg-offset-2">
           <!-- **********************************************************************************************************************************************************
                 *********************************************************************************************************************************************************** -->
-
-           <h4><i class="fa fa-angle-right"></i> Liste des configurations du contaigners </h4>
+           
+           <h4><i class="fa fa-angle-right"></i> Liste des serveurs </h4>
            <div class="form-panel">
+         
    			<table class="table table-striped table-advance table-hover">
                <thead>
                   <tr>
-                    <th><i class="fa fa-desktop"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> configuration </font></font></th>
-                    <th><i class="fa fa-desktop"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> valeur </font></font></th>
-					<th></th>
+                    <th><i class="fa fa-desktop"></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Serveur </font></font></th>
+                    <th class="hidden-phone"><i class=""></i><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> Adresse ip</font></font></th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr th:each="conf:${listconfig}">
+                  <tr th:each="serveur:${listServeur}">
                     <td>
-                      <a href="bdServeurList" th:href="@{'dockerServeurConfig?dockerServ='}">
-                      	<font style="vertical-align: inherit;">
-                      		<font style="vertical-align: inherit;">
-                      			<span th:utext="${conf.config.mot_cle}"></span>
-                      		</font>
-                      	</font>
-                     </a>
+                      <a href="bdServeurList" th:href="@{'bdServeurList?serv=' + ${serveur.id_appareil}}"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serveur.nom}"></span></font></font></a>
                     </td>
-                    <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
-                    	<span th:utext="${conf.valeur}"></span>
-                    </font></font></td>
-                    <td>
-                      <!-- <a href="/bdServeurConfig" th:href="@{'/dockerServeurConfig?dockerServ='}" class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></a>-->
-                    </td>
+                    <td class="hidden-phone"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><span th:utext="${serveur.ip.part1 + '.' + serveur.ip.part2 + '.' +serveur.ip.part3 + '.' + serveur.ip.part4 }"></span></font></font></td>
+                  	<td><a href="ServeurDelete" th:href="@{'ServeurDelete?serv=' + ${serveur.id_appareil}}" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i></a></td>
                   </tr>                  
                 </tbody>
-              </table>
-            </div>
-            <!-- /form-panel -->
+              </table>             
+              
               
             </div>
             <!-- /form-panel -->

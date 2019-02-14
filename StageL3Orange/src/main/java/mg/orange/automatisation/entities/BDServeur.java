@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 @SuppressWarnings("serial")
@@ -34,17 +35,15 @@ public class BDServeur extends Serveur {
 		this.pserveur = pserveur;
 	}
 	
-	
-	//Docker serveur
-	//@OneToMany(cascade = CascadeType.ALL)
-	//@JoinColumn(name="id_bd_serveur",nullable=false,insertable=false,updatable=false)
-	//private List<DockerServeur> dserveur;
-	//public List<DockerServeur> getDserveur() {
-	//	return dserveur;
-	//}
-	//public void setDserveur(List<DockerServeur> dserveur) {
-	//	this.dserveur = dserveur;
-	//}
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name="bdserveur",nullable=false,insertable=false,updatable=false)
+	private List<DockerServeur> dserveur;
+	public List<DockerServeur> getDserveur() {
+		return dserveur;
+	}
+	public void setDserveur(List<DockerServeur> dserveur) {
+		this.dserveur = dserveur;
+	}
 	
 	// mysql password
 	private String mysqlPasssword;
@@ -56,7 +55,7 @@ public class BDServeur extends Serveur {
 	}
 	
 	//Reseau
-	@ManyToOne(cascade=CascadeType.PERSIST)
+	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(nullable=false)
 	private Reseau reseau;
 	public Reseau getReseau() {
@@ -67,11 +66,11 @@ public class BDServeur extends Serveur {
 	}
 	
 	//Reseau Interne
-	@ManyToOne(cascade=CascadeType.PERSIST)
+	@OneToOne(cascade=CascadeType.ALL)
 	@JoinColumn(nullable=false)
 	private Reseau reseau_interne;
 	public Reseau getReseau_interne() {
-		return reseau;
+		return reseau_interne;
 	}
 	public void setReseau_interne(Reseau reseau) {
 		this.reseau_interne = reseau;
@@ -90,11 +89,12 @@ public class BDServeur extends Serveur {
 	//contructeur
 	public BDServeur() {		
 	}
-	public BDServeur(String nom,IP ip, String status,String mysqlPasssword, Reseau reseau, Reseau Interne) {
+	public BDServeur(String nom,IP ip, String status,String mysqlPasssword, Reseau reseau, Reseau Interne, PServeur pserveur) {
 		super(nom,ip);
 		this.status = status;
 		this.mysqlPasssword = mysqlPasssword;
 		this.reseau = reseau;
 		this.reseau_interne = Interne;
+		this.pserveur = pserveur;
 	}	
 }

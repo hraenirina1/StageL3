@@ -1,20 +1,27 @@
 package mg.orange.automatisation.entities;
 
-//import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.NaturalIdCache;
+
 @SuppressWarnings("serial")
 @Entity
+@NaturalIdCache
+@Cache(
+    usage = CacheConcurrencyStrategy.READ_WRITE
+)
 @PrimaryKeyJoinColumn(name = "id_appareil")
 public class DockerServeur extends Serveur {
 	
@@ -28,12 +35,19 @@ public class DockerServeur extends Serveur {
 		this.ip_interne = ip_interne;
 	}
 
-//	@OneToMany(cascade=CascadeType.ALL) 
-//	@JoinColumn
-//	private List<dockerConfig> dockerConfig;
+	@OneToMany(mappedBy = "docker",cascade = CascadeType.ALL)
+	private List<Configuration> config = new ArrayList<Configuration>();	
 	
+	public List<Configuration> getConfig() {
+		return config;
+	}
+	public void addConfig(Config config,String Valeur) {
+		Configuration configuration = new Configuration(config,this,Valeur);
+		this.config.add(configuration);
+	}
+
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name="id_bd_serveur",nullable=false)
+	@JoinColumn(name="bdserveur",nullable=false)
 	private BDServeur bdserveur;
 	
 	private String ram;

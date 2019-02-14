@@ -30,9 +30,10 @@ public class Reseau extends Appareil {
 	//constructeur
 	public Reseau() {
 	}
-	public Reseau(String nom,IP ip,int masque_reseau) {
+	public Reseau(String nom,IP ip,int masque_reseau,String Type) {
 		super(nom,ip);
 		this.masque_reseau = masque_reseau;
+		this.Type = Type;
 	}
 	
 }

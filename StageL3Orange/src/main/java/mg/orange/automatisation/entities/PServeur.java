@@ -7,7 +7,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 
 @SuppressWarnings("serial")
 @Entity
-@PrimaryKeyJoinColumn(name = "id_appareil")
+@PrimaryKeyJoinColumn(referencedColumnName="id_appareil")
 public class PServeur extends Serveur{
 	
 //	//reseau
@@ -33,5 +33,10 @@ public class PServeur extends Serveur{
 	public PServeur() {
 		super();
 	}
-
+	
+	public PServeur(String nom, IP ip) {
+		super(nom, ip);
+	}
+	
+	
 }

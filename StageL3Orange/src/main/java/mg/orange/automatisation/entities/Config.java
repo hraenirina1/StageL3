@@ -1,12 +1,15 @@
 package mg.orange.automatisation.entities;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @SuppressWarnings("serial")
 @Entity
@@ -19,6 +22,9 @@ public class Config implements Serializable {
 	@Column(unique=true)
 	private String mot_cle;
 
+	@OneToMany(mappedBy = "config")
+	private Set<Configuration> docker = new HashSet<Configuration>();
+	
 	public Config() {
 		// TODO Auto-generated constructor stub
 	}

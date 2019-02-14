@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 
 @SuppressWarnings("serial")
@@ -19,13 +20,14 @@ public abstract class Appareil implements Serializable{
 
 	@Id
 	@GeneratedValue
-	private Long id_appareil;
+	@SequenceGenerator(name="appareil_sequence")
+	private Long id_appareil = (long) 0 ;
 	@Column(unique=true,length=30)
 	private String nom;
 	@OneToOne(cascade=CascadeType.ALL)
 	private IP ip;
 	
-	public Appareil() {		
+	public Appareil() {
 	}	
 	public Appareil(String nom) {
 		super();

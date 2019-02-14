@@ -68,10 +68,10 @@
                   <p><span id="date"></span></p>
                   <footer>
                     <div class="pull-left">
-                      <h5><i class="fa fa-hdd-o"></i><span id="ramt"></span> Ko</h5>
+                      <h5><i class="fa fa-hdd-o"></i><span id="ramt"></span> Mo</h5>
                     </div>
                     <div class="pull-right">
-                      <h5><span id="ram"></span> Ko Utilisé</h5>
+                      <h5><span id="ram"></span> Mo Utilisé</h5>
                     </div>
                   </footer>
                 </div>
@@ -88,7 +88,7 @@
                    
                     
                   </script>
-                  <h3><span id="disk"></span>% USED</h3>
+                  <h3><span id="disk"></span> USED</h3>
                 </div>
               </div>
               <!-- /col-md-4 -->
@@ -151,11 +151,11 @@
 		   	else
 		   		{
 		   		var doughnutData1 = [{
-			           value: 0,
+			           value: data[3],
 			           color: "#1c9ca7"
 			         },
 			         {
-			           value: data[3],
+			           value: data[2]-data[3],
 			           color: "#f68275"
 			         }
 			       ];
@@ -179,7 +179,7 @@
 		   		$("#ram").text(data[2]);
 		   	else
 		   		$("#ram").text(0);
-		   	$("#ramt").text(data[3]+data[2]);
+		   	$("#ramt").text(data[3]);
 		   	
 		   	
 		       var myDoughnut1 = new Chart(document.getElementById("serverstatus02").getContext("2d")).Doughnut(doughnutData1);
